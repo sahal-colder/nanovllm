@@ -1,0 +1,9 @@
+/build*/
+/models/*
+!/models/.gitkeep
+__pycache__/
+*.pyc
+
+# 临时草稿与演示文件，不纳入版本控制
+/temp.c
+/演示PPT.pptx
