@@ -1,0 +1,3 @@
+mode,kernel_launch_api_calls,graph_launch_api_calls,gpu_kernels,device_memsets,distinct_graph_nodes,launch_api_total_us,gpu_activity_window_us,gpu_active_us,gpu_gap_us,gpu_gap_percent,nvtx_range_wall_us
+eager,255,0,255,5,0,501.104,2761.165,2509.807,251.358,9.103331383673195,2791.114
+graph,0,5,255,5,51,169.652,2683.33,2482.089,201.241,7.499673912638401,2700.415

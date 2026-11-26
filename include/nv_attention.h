@@ -23,6 +23,8 @@ typedef struct NvAttention {
     int32_t *d_error;
 } NvAttention;
 size_t nv_attention_workspace_bytes(const NvAttention *a);
+/* optimized: 0 scalar unsplit reference; 1 vectorized 64-token splits;
+ * 2 vectorized unsplit ablation (same warp/head mapping as reference). */
 cudaError_t nv_paged_attention(mi_dtype dtype, const void *q, void *out,
     NvAttention a, float *workspace, size_t workspace_bytes, int optimized,
     cudaStream_t stream);

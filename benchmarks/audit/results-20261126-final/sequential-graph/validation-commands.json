@@ -1,0 +1,15 @@
+[
+  "ctest --test-dir /home/wty/nanovllm/build-cuda --output-on-failure -j1",
+  "compute-sanitizer --tool memcheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/decoder-memcheck.log /home/wty/nanovllm/build-cuda/bench_decode --test-all /home/wty/nanovllm/build-cuda/fixtures",
+  "compute-sanitizer --tool memcheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/gemv-rms-memcheck.log /home/wty/nanovllm/build-cuda/bench_operators --test",
+  "compute-sanitizer --tool memcheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/attention-cold-memcheck.log /home/wty/nanovllm/build-cuda/bench_decode --audit-attention f16 32768 2 cold 5 -1",
+  "compute-sanitizer --tool memcheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/envelope-f32-memcheck.log /home/wty/nanovllm/build-cuda/bench_decode --audit-decode /home/wty/nanovllm/build-cuda/fixtures/perf.bin f32 5",
+  "compute-sanitizer --tool memcheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/envelope-f16-memcheck.log /home/wty/nanovllm/build-cuda/bench_decode --audit-decode /home/wty/nanovllm/build-cuda/fixtures/perf.bin f16 5",
+  "compute-sanitizer --tool memcheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/envelope-bf16-memcheck.log /home/wty/nanovllm/build-cuda/bench_decode --audit-decode /home/wty/nanovllm/build-cuda/fixtures/perf.bin bf16 5",
+  "compute-sanitizer --tool racecheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/decoder-racecheck.log /home/wty/nanovllm/build-cuda/bench_decode --test-all /home/wty/nanovllm/build-cuda/fixtures",
+  "compute-sanitizer --tool racecheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/gemv-rms-racecheck.log /home/wty/nanovllm/build-cuda/bench_operators --test",
+  "compute-sanitizer --tool racecheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/attention-cold-racecheck.log /home/wty/nanovllm/build-cuda/bench_decode --audit-attention f16 32768 2 cold 5 -1",
+  "compute-sanitizer --tool racecheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/envelope-f32-racecheck.log /home/wty/nanovllm/build-cuda/bench_decode --audit-decode /home/wty/nanovllm/build-cuda/fixtures/perf.bin f32 5",
+  "compute-sanitizer --tool racecheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/envelope-f16-racecheck.log /home/wty/nanovllm/build-cuda/bench_decode --audit-decode /home/wty/nanovllm/build-cuda/fixtures/perf.bin f16 5",
+  "compute-sanitizer --tool racecheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/envelope-bf16-racecheck.log /home/wty/nanovllm/build-cuda/bench_decode --audit-decode /home/wty/nanovllm/build-cuda/fixtures/perf.bin bf16 5"
+]

@@ -1,0 +1,14 @@
+ncu --metrics dram__throughput.avg.pct_of_peak_sustained_elapsed,dram__bytes.sum.per_second,dram__bytes_read.sum,dram__bytes_write.sum,sm__warps_active.avg.pct_of_peak_sustained_active,lts__t_sector_hit_rate.pct,gpu__time_duration.sum --clock-control none --export /home/wty/nanovllm/benchmarks/audit/results-20261126-final/ncu/gemv-f16-m0 --cache-control all --launch-count 1 --kernel-name regex:mi_gemv_scalar_kernel /home/wty/nanovllm/build-cuda/bench_operators --profile gemv --dtype f16
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 449457 (/home/wty/nanovllm/build-cuda/bench_operators)
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU VRAM_bytes=8272019456 SM=8.9 cuBLAS=130800 math=FP32_PEDANTIC graph_event_timing=1 L2_bytes=33554432
+==PROF== Profiling "mi_gemv_scalar_kernel": 0%....50%....100% - 3 passes
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU SM_count=24 L2_bytes=33554432 eviction_bytes=134217728 memory_bus_bits=128
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU SM_count=24 L2_bytes=33554432 eviction_bytes=134217728 memory_bus_bits=128
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU SM_count=24 L2_bytes=33554432 eviction_bytes=134217728 memory_bus_bits=128
+operator,dtype,implementation,m,k,batch,offset,lda,x_stride,y_stride,reference,p50_us,p95_us,ideal_bytes,effective_GiB_s,bandwidth_ratio_to_cublas,max_abs_err,max_rel_err,validated_elements,samples,inner,seed,cache_policy,flush_bytes
+sgemv,f16,baseline,8192,4096,1,0,4096,4096,8192,cublas,400.384009,400.384009,67133440,156.157306,0.823529,0.015625,0.000974658869,8192,1,1,0x739ab21,cold,134217728
+sgemv,f16,optimized,8192,4096,1,0,4096,4096,8192,cublas,411.936015,411.936015,67133440,151.778155,0.800435,0.015625,0.000974658869,8192,1,1,0x739ab21,cold,134217728
+sgemv,f16,cublasGemmEx,8192,4096,1,0,4096,4096,8192,cublas,329.728007,329.728007,67133440,189.619586,1.000000,0,0,8192,1,1,0x739ab21,cold,134217728
+==PROF== Disconnected from process 449457
+==PROF== Report: /home/wty/nanovllm/benchmarks/audit/results-20261126-final/ncu/gemv-f16-m0.ncu-repz

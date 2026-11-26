@@ -1,0 +1,3 @@
+[
+  "/home/wty/nanovllm/build-cuda/bench_decode --audit-attention f32 4096 1 hot 100 -1"
+]

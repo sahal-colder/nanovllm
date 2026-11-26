@@ -1,0 +1,23 @@
+ncu --metrics dram__throughput.avg.pct_of_peak_sustained_elapsed,dram__bytes.sum.per_second,dram__bytes_read.sum,dram__bytes_write.sum,sm__warps_active.avg.pct_of_peak_sustained_active,lts__t_sector_hit_rate.pct,gpu__time_duration.sum --clock-control none --export /home/wty/nanovllm/benchmarks/audit/results-20261126-final/ncu/attention-f32-cold-m2 --replay-mode application --cache-control none --profile-from-start off --kernel-name 'regex:nv_attention_(partition|merge)_kernel' /home/wty/nanovllm/build-cuda/bench_decode --audit-attention f32 4096 1 cold 100 2 --profile
+==WARNING== Note: Running with uncontrolled GPU caches. Profiling results may be inconsistent.
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 447664 (/home/wty/nanovllm/build-cuda/bench_decode)
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU SM_count=24 L2_bytes=33554432 eviction_bytes=134217728 memory_bus_bits=128
+==PROF== Profiling "nv_attention_partition_kernel": Application replay pass 1
+dtype,batch,heads,kv_heads,head_dim,seq_len,implementation,p50_us,p95_us,ideal_bytes,effective_GiB_s,max_abs_err,max_rel_err,samples,cache_policy,flush_bytes
+f32,1,16,4,128,4096,unsplit_vec4,0.000000,0.000000,16793600,0.000000,6.70552254e-08,3.84262625,1,cold,134217728
+==PROF== Disconnected from process 447664
+==PROF== Connected to process 447699 (/home/wty/nanovllm/build-cuda/bench_decode)
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU SM_count=24 L2_bytes=33554432 eviction_bytes=134217728 memory_bus_bits=128
+==PROF== Profiling "nv_attention_partition_kernel": Application replay pass 2
+dtype,batch,heads,kv_heads,head_dim,seq_len,implementation,p50_us,p95_us,ideal_bytes,effective_GiB_s,max_abs_err,max_rel_err,samples,cache_policy,flush_bytes
+f32,1,16,4,128,4096,unsplit_vec4,0.000000,0.000000,16793600,0.000000,6.70552254e-08,3.84262625,1,cold,134217728
+==PROF== Disconnected from process 447699
+==PROF== Connected to process 447719 (/home/wty/nanovllm/build-cuda/bench_decode)
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU SM_count=24 L2_bytes=33554432 eviction_bytes=134217728 memory_bus_bits=128
+==PROF== Profiling "nv_attention_partition_kernel": Application replay pass 3
+dtype,batch,heads,kv_heads,head_dim,seq_len,implementation,p50_us,p95_us,ideal_bytes,effective_GiB_s,max_abs_err,max_rel_err,samples,cache_policy,flush_bytes
+f32,1,16,4,128,4096,unsplit_vec4,0.000000,0.000000,16793600,0.000000,6.70552254e-08,3.84262625,1,cold,134217728
+==PROF== Disconnected from process 447719
+==PROF== Creating report from application replay data: 0%.....100%
+==PROF== Report: /home/wty/nanovllm/benchmarks/audit/results-20261126-final/ncu/attention-f32-cold-m2.ncu-repz

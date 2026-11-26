@@ -94,7 +94,7 @@ for r in sample:text.append(f'| {r["implementation"]} | {float(r["p50_us"]):.2f}
 text+=['', '完整 144 行覆盖 B=1/4、H=16、KV=16/4/1、D=128、seq=128/1024/1037/4096、三种 dtype。',
        '有效字节数采用唯一 KV + Q/O：`dtype_bytes*(2*sum(lengths)*KV*D+2*B*H*D)`。',
        'GQA 复读、分段 scratch 与元数据不膨胀分子；这是算法有效带宽，不是 DRAM 计数。',
-       '主矩阵为 warm-cache，NCU 则 cache flush；二者不能直接混用。', '',
+       '主矩阵 cache_policy=' + attention[0].get('cache_policy','hot (historical, no explicit flush)') + '；冷缓存每次调用前驱逐，flush 不计入延迟。', '',
        '## 完整 Decode 与 Graph', '',
        '随机权重 4 层、hidden=512、FFN=1536、H=8、KV=2、vocab=512、seq=129、B=1；',
        '包含 embedding、全部层和最终 logits。输入/长度固定的重复单步，初始 KV 为随机数据。',

@@ -19,7 +19,7 @@ root=Path(__file__).resolve().parents[1];a.out.mkdir(parents=True,exist_ok=True)
 fields=['name','memory.total','driver_version','pstate','clocks.sm','clocks.mem','temperature.gpu']
 gpu=list(csv.reader(io.StringIO(run(['nvidia-smi','--query-gpu='+','.join(fields),'--format=csv,noheader,nounits']))))
 files=[root/'CMakeLists.txt']
-for directory in ['include','src','tests','benchmarks/round2','benchmarks/operators','tools']:
+for directory in ['include','src','tests','benchmarks/round2','benchmarks/operators','benchmarks/audit','tools']:
     files += [f for f in (root/directory).rglob('*') if f.is_file() and f.suffix in ['.h','.c','.cu','.cuh','.py','.sh']]
 cublas_version=None
 for log in sorted(a.out.glob('gemv-rms*validation.log')):

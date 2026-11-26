@@ -1,0 +1,10 @@
+PASS reject false_complete
+PASS reject completed_with_errors
+PASS reject missing_numeric_pass
+PASS local Markdown links
+PASS recorded measurement binaries match current build
+PASS 15/16 partial state retained
+PASS C11 format/syntax check
+PASS Python compile check
+PASS Bash syntax check
+PASS git diff --check

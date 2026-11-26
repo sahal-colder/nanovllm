@@ -1,0 +1,22 @@
+{"time": "2026-11-26T07:21:58.172477+00:00", "compute": [], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P3, 2010, 7001, 42, 0, 15"}
+{"time": "2026-11-26T07:21:58.249867+00:00", "compute": [], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P3, 2010, 7001, 42, 0, 18"}
+{"time": "2026-11-26T07:21:59.293526+00:00", "compute": [], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 43, 0, 18"}
+{"time": "2026-11-26T07:21:59.332582+00:00", "compute": [], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 43, 0, 18"}
+{"time": "2026-11-26T07:21:59.375131+00:00", "compute": [], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 43, 0, 32"}
+{"time": "2026-11-26T07:22:00.420610+00:00", "compute": [["416902", " /home/wty/nanovllm/build-cuda/bench_decode", " 242"]], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 44, 100, 265"}
+{"time": "2026-11-26T07:22:01.455864+00:00", "compute": [], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 44, 0, 18"}
+{"time": "2026-11-26T07:22:01.495513+00:00", "compute": [], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 44, 0, 18"}
+{"time": "2026-11-26T07:22:01.546484+00:00", "compute": [], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P3, 2580, 7001, 44, 0, 32"}
+{"time": "2026-11-26T07:22:02.586666+00:00", "compute": [["417089", " /home/wty/nanovllm/build-cuda/bench_decode", " 236"]], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P3, 2010, 7001, 44, 0, 259"}
+{"time": "2026-11-26T07:22:03.626517+00:00", "compute": [["417089", " /home/wty/nanovllm/build-cuda/bench_decode", " 236"]], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P3, 2010, 7001, 43, 0, 259"}
+{"time": "2026-11-26T07:22:04.669194+00:00", "compute": [["417089", " /home/wty/nanovllm/build-cuda/bench_decode", " 236"]], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P3, 2010, 7001, 44, 0, 259"}
+{"time": "2026-11-26T07:22:05.710989+00:00", "compute": [["417089", " /home/wty/nanovllm/build-cuda/bench_decode", " 236"]], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P3, 2010, 7001, 44, 0, 259"}
+{"time": "2026-11-26T07:22:06.751444+00:00", "compute": [["417089", " /home/wty/nanovllm/build-cuda/bench_decode", " 236"]], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 46, 100, 259"}
+{"time": "2026-11-26T07:22:07.791225+00:00", "compute": [["417089", " /home/wty/nanovllm/build-cuda/bench_decode", " 236"]], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 46, 100, 259"}
+{"time": "2026-11-26T07:22:08.832903+00:00", "compute": [["417089", " /home/wty/nanovllm/build-cuda/bench_decode", " 236"]], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 51, 100, 259"}
+{"time": "2026-11-26T07:22:09.875098+00:00", "compute": [["417089", " /home/wty/nanovllm/build-cuda/bench_decode", " 236"]], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 47, 100, 259"}
+{"time": "2026-11-26T07:22:10.914327+00:00", "compute": [["417089", " /home/wty/nanovllm/build-cuda/bench_decode", " 236"]], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 47, 100, 259"}
+{"time": "2026-11-26T07:22:11.956230+00:00", "compute": [], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 47, 2, 18"}
+{"time": "2026-11-26T07:22:11.996724+00:00", "compute": [], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P0, 2580, 8001, 47, 2, 18"}
+{"time": "2026-11-26T07:22:12.053174+00:00", "compute": [], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P3, 2580, 7001, 46, 0, 32"}
+{"time": "2026-11-26T07:22:13.093763+00:00", "compute": [["417295", " /home/wty/nanovllm/build-cuda/bench_decode", " 236"], ["417196", " VLLM::EngineCore", " 6792"]], "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P3, 2580, 7001, 46, 4, 7056"}

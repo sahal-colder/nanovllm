@@ -1,0 +1,34 @@
+{
+  "eager": {
+    "kernel_launch_api_calls": 255,
+    "graph_launch_api_calls": 0,
+    "gpu_kernels": 255,
+    "device_memsets": 5,
+    "distinct_graph_nodes": 0,
+    "launch_api_total_us": 641.447,
+    "gpu_activity_window_us": 1698.751,
+    "gpu_active_us": 1407.956,
+    "gpu_gap_us": 290.795,
+    "gpu_gap_percent": 17.118165051852802,
+    "nvtx_range_wall_us": 1729.331
+  },
+  "graph": {
+    "kernel_launch_api_calls": 0,
+    "graph_launch_api_calls": 5,
+    "gpu_kernels": 255,
+    "device_memsets": 5,
+    "distinct_graph_nodes": 51,
+    "launch_api_total_us": 194.124,
+    "gpu_activity_window_us": 1601.587,
+    "gpu_active_us": 1378.615,
+    "gpu_gap_us": 222.972,
+    "gpu_gap_percent": 13.921941174597446,
+    "nvtx_range_wall_us": 1624.137
+  },
+  "steps_per_mode": 5,
+  "host_launches_per_step": {
+    "eager": 51,
+    "graph": 1
+  },
+  "scope": "Five instrumented steps/mode; kernel+device-memset activity union; gaps include event/synchronization and tracing overhead. Use unprofiled 100-sample CSV for latency."
+}

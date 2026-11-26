@@ -1,0 +1,2 @@
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU SM_count=24 L2_bytes=33554432 eviction_bytes=134217728 memory_bus_bits=128
+FAIL dynamic transfer Graph CPU FP64 got=-0.0849609375 ref=-0.11328125 abs=0.0283203 rel=0.25

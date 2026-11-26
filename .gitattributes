@@ -1,0 +1,6 @@
+# Preserve audit evidence byte-for-byte, including profiler whitespace and CSV CRLF.
+benchmarks/audit/results-*/** -text -whitespace
+benchmarks/audit/*rejected-*/** -text -whitespace
+benchmarks/audit/interfered-*/** -text -whitespace
+benchmarks/audit/history-nsys/** -text -whitespace
+benchmarks/audit/verification/** -text -whitespace

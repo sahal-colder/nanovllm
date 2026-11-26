@@ -1,0 +1,10 @@
+dtype,mode,hidden,layers,heads,kv_heads,batch,seq_len,graph_nodes,samples,p50_wall_us,p95_wall_us,p50_device_us,p95_device_us,max_abs_err,max_rel_err
+f16,eager,512,4,8,2,1,129,52,5,342.545998,385.499001,336.127996,372.063994,0.00390625,0.023255814
+f16,graph,512,4,8,2,1,129,52,5,316.181000,358.632999,310.207993,354.079992,0.00390625,0.023255814
+Capture range started in the application.
+Capture range ended in the application.
+Generating '/home/wty/nanovllm/benchmarks/audit/results-20261126-final/nsys/tmp/nsys-wty/nsys-report-a190.qdstrm'
+[1/1] [0%                          ] decode-graph.nsys-repProcessing events...
+[1/1] [0%                          ] decode-graph.nsys-rep[1/1] [1%                          ] decode-graph.nsys-rep[1/1] [2%                          ] decode-graph.nsys-rep[1/1] [5%                          ] decode-graph.nsys-rep[1/1] [==19%                       ] decode-graph.nsys-rep[1/1] [==20%                       ] decode-graph.nsys-rep[1/1] [========42%                 ] decode-graph.nsys-rep[1/1] [===========50%              ] decode-graph.nsys-rep[1/1] [=======================96%  ] decode-graph.nsys-rep[1/1] [========================98% ] decode-graph.nsys-rep[1/1] [========================100%] decode-graph.nsys-rep[1/1] [========================100%] decode-graph.nsys-rep
+Generated:
+	/home/wty/nanovllm/benchmarks/audit/results-20261126-final/nsys/decode-graph.nsys-rep

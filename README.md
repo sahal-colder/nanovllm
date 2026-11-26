@@ -4,7 +4,11 @@
 采样器、请求调度、分页块引用及前缀复用，在同一执行链路接入手写 CUDA 算子与 Graph。
 KV-Fabric 负责外部存储与数据传输；本仓库负责 GPU 常驻 KV 和推理计算。
 
-本轮完整结果：[数值与性能验收](docs/CUDA_VALIDATION.md)、
+最新审计：[评测口径与待验收项](docs/PERFORMANCE_AUDIT_20261126.md)、
+[冷 L2 / Baseline / 完整步评测入口](benchmarks/audit/README.md)。
+已完成独占GPU冷缓存重测与15项sanitizer验证；额外16层整步Racecheck未完成，受干扰/失败记录保留并排除。
+
+历史完整结果：[数值与性能验收](docs/CUDA_VALIDATION.md)、
 [阶段交付总结（含双项目简历）](docs/ROUND2_ACCEPTANCE.md)。
 
 ## 架构与代码入口
@@ -57,41 +61,37 @@ FP32/FP16/BF16 均 FP32 累加；向量地址不对齐时在同一 Kernel 内安
 RoPE 使用原模型的邻接对形式，支持原有 legacy llama2.c FP32 checkpoint，
 加载后可转为 FP16/BF16；不直接加载 safetensors/GGUF/Qwen 权重。
 
-## 代表性实测
+## 冷L2实测与验收
 
-RTX 4060 Laptop 8188 MiB，CUDA 13.4 / cuBLAS 13.8，SM 89。
-第一轮 SGEMV/RMSNorm 延迟样本保留在 `benchmarks/operators/results/`；
-本轮在 nano-vLLM 中重新采集三算子的 NCU，并完成全链路回归。
+RTX4060 Laptop，24 SM/CC8.9，L2 **33,554,432 bytes（32 MiB）**；Driver615.71.09、CUDA13.4、cuBLAS13.8。未锁频，进程/频率/温度快照随结果保存；测量期间无其他CUDA计算任务。
 
-| 算子与形状 | 基础 P50 | 优化 P50 | 口径 |
-| --- | ---: | ---: | --- |
-| FP32 SGEMV 4096×4096 B1 | 272.38 µs | 272.38 µs | 与 cuBLAS 同级；大矩阵访存受限 |
-| FP32 RMSNorm 128×4096 | 8.19 µs | 6.14 µs | 约 1.33×；CPU 逐元素校验 |
-| FP32 Attention B1/H16/KV4/D128/S4096 | 1596.42 µs | 73.73 µs | 对照本项目串行 Warp 参考；非成熟库比较 |
+每次算子调用前同stream驱逐128MiB，flush不计时。以下来自本轮100样本真实实测；P50/P95与完整Baseline见[审计报告](docs/PERFORMANCE_AUDIT_20261126.md)。
 
-有效带宽不能冒充 DRAM 实测。上述 Attention 为 warm-cache；本轮 NCU cache flush：
+| Attention精度 | 形状 | 未分段P50 µs | 分段P50 µs | 加速比 |
+| --- | --- | --- | --- | --- |
+| f32 | B1/H16/KV4/D128/S4096 | 2917.54 | 120.83 | 24.15× |
+| f16 | B2/H16/KV4/D128/S32768 | 23314.43 | 1168.38 | 19.95× |
+| bf16 | B2/H16/KV4/D128/S32768 | 23196.67 | 1161.22 | 19.98× |
 
-| FP32 Kernel | DRAM 利用率 | 实测 GiB/s | Achieved Occupancy |
-| --- | ---: | ---: | ---: |
-| SGEMV | 96.59% | 230.06 | 98.49% |
-| RMSNorm | 65.72% | 136.38 | 85.86% |
-| Attention 分段 | 62.60% | 130.43 | 75.86% |
-| Attention 合并 | 38.63% | 80.24 | 11.16% |
+FP32原形状热缓存P50 73.73 µs，驱逐后120.83 µs；NCU热DRAM读取0、冷约16MiB，确认L2影响。低精度B2实际长度[32768,32765]，唯一KV约127.994MiB。基线是自有每head一warp未分段实现；新增向量未分段消融与分段核分别对照，不能称为成熟库比较。
 
-NCU 形状分别为 8192×4096/B1、128×4096、B1/H16/KV4/D128/S4096。
-合并只有 16 个 CTA，低并行度仍是该形状的限制。
+| 冷缓存对照 | Baseline P50 µs | 优化 P50 µs | 结论 |
+| --- | --- | --- | --- |
+| RMSNorm FP32 128×4096 | 25.60 | 18.43 | 1.39×；标量重读X→向量/寄存器驻留 |
+| GEMV FP32 8192×4096/B1，W128MiB | 558.08（cuBLAS） | 620.54 | 本实现仍慢于cuBLAS，不声称超越 |
+| 16层d1024随机模型FP16完整GPU greedy步 | 2735.13 | 2622.72 | 4.11%降低；含metadata H2D/Token回传 |
 
-4 层随机权重 Decoder（d512、FFN1536、H8/KV2、seq129、B1），100 样本计算链路时间：
+完整步固定B1/seq129，不含CPU页管理/调度或文本输出，非训练模型生成TPS。Graph对照双方预热20次，100组成对交错、交替先后采样。
 
-| dtype | eager P50/P95 µs | Graph P50/P95 µs |
-| --- | ---: | ---: |
-| FP32 | 482.95 / 484.93 | 454.50 / 458.28 |
-| FP16 | 250.34 / 251.41 | 221.74 / 223.49 |
-| BF16 | 249.36 / 249.99 | 221.49 / 222.39 |
+独立NCU：FP16 Attention partition DRAM 63.69%、132.75 GiB/s、Occupancy 79.54%；FP32 GEMV DRAM 96.72%、230.37 GiB/s。有效带宽与真实DRAM带宽分开，partition不能代表整条Attention。
 
-计时覆盖 Host 提交至 stream 完成，不含元数据 H2D、logits D2H、采样及 Graph 实例化。
-Nsight Systems 同配置各 5 步：GPU Kernel 均 255 个，Host 提交由 255 次 Kernel
-Launch 变为 5 次 Graph Launch，即每步 51 → 1；未声称消除全部 GPU 调度间隙。
+8/8 CTest，15份完成的Memcheck/Racecheck日志零错误；16层FP16普通数值与Memcheck通过，额外整步Racecheck未完成。CPU FP64逐输出/逐物理KV槽在已验收范围容差内零失败。**16层BF16动态前向超出既定容差，已保留失败并排除性能结论；没有放宽容差。** 数值零失败与浮点零误差分开表述。
+
+FP16 NSys真实SQLite：每模式5步，255次Kernel提交→5次Graph提交，即每步51→1，GPU仍执行相同51个Kernel。trace是重复计算步，只用于Launch归因。
+
+![FP16 NSys实际时间线](benchmarks/audit/results-20261126-final/nsys/decode-timeline.png)
+
+精确构建/重测/NCU/NSys/sanitizer命令、缓存说明及原始证据见[评测入口](benchmarks/audit/README.md)，[4条简历改写](docs/RESUME_CUDA_AUDITED.md)。
 
 ## 构建与一键复现
 
@@ -102,7 +102,7 @@ CPU 仍可 `make && make test`。CUDA 模式需要 CMake 3.18+、CUDA Toolkit �
 # 全量构建、8 项 CTest、Memcheck/Racecheck、Attention 和 Decode 基准
 bash tools/validate_cuda.sh build-cuda benchmarks/operators/runs/new-run
 
-# 加上 NCU 和 Nsys：仅 NCU 在本机需要 sudo 计数器权限
+# 加上 NCU 和 Nsys：需要本机已开放对应性能计数器权限，无需脚本内sudo
 bash tools/validate_cuda.sh build-cuda benchmarks/operators/runs/profile-run --profile
 ```
 
@@ -122,7 +122,7 @@ build-cuda/nanovllm_cuda models/stories260K.bin -z models/tok512.bin \
 python3 benchmarks/round2/verify_pretrained.py build-cuda models benchmarks/operators/runs/pretrained
 ```
 
-本轮真实 260K checkpoint 的 4×32 个 greedy Token 在 CPU/eager/Graph 下严格一致。
+历史验收中真实 260K checkpoint 的 4×32 个 greedy Token 在 CPU/eager/Graph 下严格一致。
 FP16/BF16 做数值误差验收，不承诺与 FP32 的生成 Token 相同。
 CPU 调度每个 tick 仍串行推进各请求；未实现 GPU 批量 GEMM、并行 Prefill、量化或服务层。
 TinyStories 不具备可靠中文问答能力。出处与 MIT 许可证保留于 [third_party/](third_party/README.md)。

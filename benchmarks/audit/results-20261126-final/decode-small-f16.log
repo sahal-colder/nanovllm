@@ -1,0 +1,7 @@
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU SM_count=24 L2_bytes=33554432 eviction_bytes=134217728 memory_bus_bits=128
+PASS dynamic graph_eager_bitwise_equal=1 pos=127 dtype=f16 logits=512
+PASS dynamic graph_eager_bitwise_equal=1 pos=128 dtype=f16 logits=512
+PASS dynamic graph_eager_bitwise_equal=1 pos=129 dtype=f16 logits=512
+PASS dynamic graph_eager_bitwise_equal=1 pos=143 dtype=f16 logits=512
+PASS dynamic graph_eager_bitwise_equal=1 pos=144 dtype=f16 logits=512
+PASS audit decoder dtype=f16 layers=4 dynamic_steps=5 logits=4608 max_abs=0.00390625 max_rel=0.0783216783 KV_slots=4194304 KV_abs=0.000244140625 greedy_matches_gpu_logits=1

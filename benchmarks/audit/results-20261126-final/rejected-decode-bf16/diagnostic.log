@@ -1,0 +1,13 @@
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU SM_count=24 L2_bytes=33554432 eviction_bytes=134217728 memory_bus_bits=128
+PASS dynamic graph_eager_bitwise_equal=1 pos=127 dtype=bf16 logits=8192
+PASS dynamic graph_eager_bitwise_equal=1 pos=128 dtype=bf16 logits=8192
+PASS dynamic graph_eager_bitwise_equal=1 pos=129 dtype=bf16 logits=8192
+PASS dynamic graph_eager_bitwise_equal=1 pos=143 dtype=bf16 logits=8192
+FAIL dynamic transfer Graph CPU FP64 got=-0.0849609375 ref=-0.11328125 abs=0.0283203 rel=0.25
+Traceback (most recent call last):
+  File "/home/wty/nanovllm/benchmarks/audit/guard_command.py", line 10, in <module>
+    run_checked(sys.argv[3:],sys.stdout,sys.stderr,telemetry)
+  File "/home/wty/nanovllm/benchmarks/audit/guard.py", line 28, in run_checked
+    if child.returncode:raise subprocess.CalledProcessError(child.returncode,command)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+subprocess.CalledProcessError: Command '['build-cuda/bench_decode', '--audit-decode', 'build-cuda/fixtures/audit16.bin', 'bf16', '5']' returned non-zero exit status 1.

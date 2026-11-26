@@ -1,0 +1,61 @@
+{
+  "collected_at": "2026-11-26T15:34:59.810277+08:00",
+  "scope": "build + non-GPU tests + archived evidence only; new GPU validation NOT completed",
+  "base_commit": "327ad86c1aa68c6647b331fc03282519ef0adbef",
+  "source_sha256": {
+    "CMakeLists.txt": "04a1fe13a56139888a312eb7fbfaedea77d705f8409e032c1d89f51b0e00d823",
+    "README.md": "b62d37e2fc5ce1b5283343eebb4ee85a9fe0aefb2b085af4964bca48c60c4f7f",
+    "benchmarks/audit/README.md": "a13711cd5c0f7bcc6143340a03561f942a077b8d0977e61493518d78264644e8",
+    "benchmarks/audit/audit_history.py": "d1fd9c3d334507dce609734a31489de3bf7b02f50f2d51fe42a84f5b4049882c",
+    "benchmarks/audit/cache.cu": "edbb2b8a1f9dd402037a46c4d6c7e126b6b2de5b4d1cbffb1c807038cc2ca7b7",
+    "benchmarks/audit/cache.h": "db858259edbc137d7302a180bc7126e961b0786f7acb8928cb5eeeefdb6a19ab",
+    "benchmarks/audit/greedy.cu": "99468927a1657ef12c18e67ca8c2095351e43e92d119a419fa5235230602433a",
+    "benchmarks/audit/greedy.h": "7885bb89acacdeee91becb43af8d49f8c90ebb7ed8a423d2de586da1ffad9487",
+    "benchmarks/audit/guard.py": "e83e2640384fb52280d35c57c869eaae70ab2c6dcb474e16644915ab45a2c3df",
+    "benchmarks/audit/guard_command.py": "0965e7b9f80f035667ac5e39c07401e1176024ad606a6278677271667ce2e3af",
+    "benchmarks/audit/make_model.py": "8078d911c5d9f3b82671a8e510fd33387b769d8474c64be76d328c4732fbc2d9",
+    "benchmarks/audit/profile_audit.py": "51979af105365c2a95071b6c1aea4113cd30ad89b2a4f40c2b0e17126596566f",
+    "benchmarks/audit/run_audit.py": "924a450100390f620ab8de9e553983757b0e63e0083dd072571db65a0d99f588",
+    "benchmarks/audit/run_decode.py": "fbcc586affeff8c06cf5403f94dd79a21118e4ffc553abd9d752919bd52d172e",
+    "benchmarks/audit/validate_audit.py": "3c32d1815426b0c08ef8bb3f2937d64cd2cd83428760b81700eaace5fc0164a1",
+    "benchmarks/operators/bench_operators.c": "cc7063c187b0a35d07ad86d66115c4f371849c32bc1572411ff5ddb05d99e6d0",
+    "benchmarks/round2/attention_bench.c": "e1ba82d7705a4e746d6295e8a6be5425f5490c801869e0cb0e75558d5d5c1ce1",
+    "benchmarks/round2/common.h": "23f1e13215bb69f0b89698c11c10c120c4a7a3848fffb3716289c9f18579f189",
+    "benchmarks/round2/decode_bench.c": "c7305abfc8ef19cb0d91e39ffe3c906833733806dc1787128013b8c6871cf7d7",
+    "benchmarks/round2/main.c": "ab34b04cd68b54f08baf7f5ceb956b958f272af2c9614516ee2e77272a02ccb3",
+    "benchmarks/round2/profile_graph.sh": "53a87f189b91c241aa9bd4094821ab3c9890e4a2c9e957b5724ff06bf8753b01",
+    "benchmarks/round2/summarize.py": "9a11b9fec2dfd6974a50bf92c6049ad060ecdd30a20149d586d3bbf7e3b76a4a",
+    "docs/CUDA_VALIDATION.md": "764649010847a865810335ac5efea99b8e48847f7abc739100121fcf8a459355",
+    "docs/PERFORMANCE_AUDIT_20261126.md": "45efd33c46a56a69e612007d132370384506ca7ac88b0c57ad7109a1290543b8",
+    "include/nv_attention.h": "cd1100537463b0be0ba2599db5f73cfcdcff125f55bdd8e86b7c3e8e2e5d28d7",
+    "src/operators/attention.cu": "7401bba089377b9802c6a495b4b36f797662fd2804dd8bbed405f2c1ef7b40c6",
+    "tools/record_cuda_environment.py": "3c521416096a7a1ba2fba4d1414871f5b21425e01044e84459c220443108eec6"
+  },
+  "binary_sha256": {
+    "bench_decode": "1f63d2ab335e90e09c888e2bd2b14b68d6f51447bbe7491827b70a021a7547f0",
+    "bench_operators": "3eaae24dca12ac5db434ddf3b4caf5db683ffdc205cc50017380c841c3a3229e",
+    "nanovllm_cuda": "c7f53a84b961d8700c761744066e6fa04f77b7f6e6b2508526be0d1cda28b827"
+  },
+  "model": {
+    "config": [
+      1024,
+      2816,
+      16,
+      16,
+      4,
+      8192,
+      2048
+    ],
+    "seed": 719,
+    "sha256": "bab083a83076c120b67119f12504e0be8c3bdd6cc8c7fea2a2ba03b2f5cdf443",
+    "bytes": 755634204,
+    "numpy": "2.5.4",
+    "synthetic": true
+  },
+  "rejected_runs": [
+    "benchmarks/audit/interfered-20261126",
+    "benchmarks/audit/guard-rejected-20261126",
+    "benchmarks/audit/preflight-rejected-20261126"
+  ],
+  "user_constraint": "Preserve VLLM process; finish code and historical audit first."
+}

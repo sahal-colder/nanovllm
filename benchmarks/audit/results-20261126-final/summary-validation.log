@@ -1,0 +1,1 @@
+PASS measured tables: 18 attention, 30 operators, 28 NCU, 12 decoder rows; 15 sanitizer logs, large_full_racecheck_passed=False; /home/wty/nanovllm/benchmarks/audit/results-20261126-final/REPORT.md

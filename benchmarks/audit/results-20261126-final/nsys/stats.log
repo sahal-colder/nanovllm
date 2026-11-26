@@ -1,0 +1,7 @@
+Generating SQLite file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/nsys/decode-graph.sqlite from /home/wty/nanovllm/benchmarks/audit/results-20261126-final/nsys/decode-graph.nsys-rep
+Processing [/home/wty/nanovllm/benchmarks/audit/results-20261126-final/nsys/decode-graph.sqlite] with [/opt/nvidia/nsight-systems/2026.3.2/target-linux-x64/reports/cuda_api_sum.py] to [/home/wty/nanovllm/benchmarks/audit/results-20261126-final/nsys/stats_cuda_api_sum.csv]... PROCESSED
+
+Processing [/home/wty/nanovllm/benchmarks/audit/results-20261126-final/nsys/decode-graph.sqlite] with [/opt/nvidia/nsight-systems/2026.3.2/target-linux-x64/reports/cuda_gpu_kern_sum.py] to [/home/wty/nanovllm/benchmarks/audit/results-20261126-final/nsys/stats_cuda_gpu_kern_sum.csv]... PROCESSED
+
+Processing [/home/wty/nanovllm/benchmarks/audit/results-20261126-final/nsys/decode-graph.sqlite] with [/opt/nvidia/nsight-systems/2026.3.2/target-linux-x64/reports/nvtx_sum.py] to [/home/wty/nanovllm/benchmarks/audit/results-20261126-final/nsys/stats_nvtx_sum.csv]... PROCESSED
+

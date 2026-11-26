@@ -26,7 +26,7 @@ done
 "$nv_build/bench_decode" --decode "$nv_build/fixtures/perf.bin" > "$nv_out/decode.csv" 2> "$nv_out/decode.log"
 nv_require=()
 if [[ "$nv_profile" == "--profile" ]]; then
-  sudo /usr/bin/python3 "$nv_root/benchmarks/round2/profile_all.py" "$nv_build" --out "$nv_out"
+  "$nv_python" "$nv_root/benchmarks/round2/profile_all.py" "$nv_build" --out "$nv_out"
   bash "$nv_root/benchmarks/round2/profile_graph.sh" "$nv_build/bench_decode" "$nv_build/fixtures/perf.bin" "$nv_out/nsys"
   "$nv_python" "$nv_root/benchmarks/round2/analyze_nsys.py" "$nv_out/nsys/decode-graph.sqlite" > "$nv_out/nsys/analysis.log"
   nv_require=(--require-profilers)

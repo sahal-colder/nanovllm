@@ -1,0 +1,16 @@
+[ 15%] Built target nano_operators
+[ 31%] Built target nano_model
+[ 40%] Built target nano_bench_cache
+[ 46%] Built target nano_cpu
+[ 53%] Built target bench_operators
+[ 62%] Built target nano_cuda
+[ 68%] Built target nanovllm
+[ 75%] Built target test_engine
+[ 81%] Built target test_tokenizer
+[ 87%] Built target nanovllm_cuda
+Consolidate compiler generated dependencies of target bench_decode
+[ 96%] Building C object CMakeFiles/bench_decode.dir/benchmarks/round2/decode_bench.c.o
+[ 96%] Building C object CMakeFiles/bench_decode.dir/benchmarks/round2/attention_bench.c.o
+[ 96%] Building C object CMakeFiles/bench_decode.dir/benchmarks/round2/main.c.o
+[100%] Linking C executable bench_decode
+[100%] Built target bench_decode

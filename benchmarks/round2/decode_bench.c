@@ -1,4 +1,6 @@
 #include "common.h"
+#include "../audit/cache.h"
+#include "../audit/greedy.h"
 #include <cuda_profiler_api.h>
 #include <nvtx3/nvToolsExt.h>
 /* Independent FP64 arithmetic reference with explicit storage-rounding points.
@@ -125,9 +127,9 @@ static void fill_prefix(NvCuda*g,NvCache*c){
         CHECK(cudaMemcpy(g->h_page_allocations[p],h,count*nv_bytes(g->dtype),cudaMemcpyHostToDevice));
     }free(h);
 }
-void decode_benchmark(const char*path,int trace){
+void decode_benchmark(const char*path,int trace,int selected){
     puts("dtype,mode,hidden,layers,heads,kv_heads,batch,seq_len,graph_nodes,samples,p50_wall_us,p95_wall_us,p50_device_us,p95_device_us,max_abs_err,max_rel_err");
-    for(int dt=0;dt<(trace?1:3);dt++){
+    for(int dt=selected>=0?selected:0;dt<(selected>=0?selected+1:3);dt++){
         NvModel m;nv_model_load(&m,path);int t=16,blocks=(m.config.seq_len-1)/t+1;
         NvCuda g;nv_cuda_init(&g,&m,blocks,t,1,dt,1);NvCache cpu;nv_cache_init(&cpu,&m.config,(NvOptions){blocks,t,1,1,0});fill_prefix(&g,&cpu);
         int32_t*table=nv_alloc(blocks,4);shuffled(table,blocks);int32_t token=7,len=129;
@@ -154,4 +156,113 @@ void decode_benchmark(const char*path,int trace){
         if(trace)CHECK(cudaProfilerStop());
         nv_cuda_free(&g);nv_cache_free(&cpu);nv_model_free(&m);free(table);free(expected);
     }
+}
+
+/* Benchmark-only transfer/sampling envelope. The production engine still
+ * supports CPU temperature/top-p sampling and owns page scheduling. */
+static int greedy_cpu(const float*x,int n){int best=0;for(int i=1;i<n;i++)if(x[i]>x[best])best=i;return best;}
+static void envelope(NvCuda*g,int gpu_greedy,int32_t*d_next,int32_t*h_next){
+    CHECK(cudaMemcpyAsync(g->d_tokens,g->h_tokens,4,cudaMemcpyHostToDevice,g->stream));
+    CHECK(cudaMemcpyAsync(g->d_lengths,g->h_lengths,4,cudaMemcpyHostToDevice,g->stream));
+    CHECK(cudaMemcpyAsync(g->d_table,g->h_table,(size_t)g->max_blocks*4,cudaMemcpyHostToDevice,g->stream));
+    CHECK(nv_cuda_step(g));
+    if(gpu_greedy){CHECK(nv_bench_greedy(g->dtype,g->d_logits,g->config.vocab_size,d_next,g->stream));
+        CHECK(cudaMemcpyAsync(h_next,d_next,4,cudaMemcpyDeviceToHost,g->stream));}
+    else CHECK(cudaMemcpyAsync(g->h_output,g->d_logits,(size_t)g->config.vocab_size*nv_bytes(g->dtype),cudaMemcpyDeviceToHost,g->stream));
+    CHECK(cudaMemcpyAsync(g->h_error,g->d_error,4,cudaMemcpyDeviceToHost,g->stream));
+}
+static int finish_envelope(NvCuda*g,int gpu_greedy,int32_t*h_next){
+    CHECK(cudaStreamSynchronize(g->stream));REQUIRE(!*g->h_error);
+    if(gpu_greedy)return *h_next;
+    for(int j=0;j<g->config.vocab_size;j++)g->h_logits[j]=nv_unpack(g->h_output,j,g->dtype);
+    return greedy_cpu(g->h_logits,g->config.vocab_size);
+}
+static void greedy_test(mi_dtype dt){
+    int sizes[]={1,31,257,8193};cudaStream_t stream;CHECK(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
+    for(int s=0;s<4;s++){
+        int n=sizes[s];void*h=nv_alloc(n,nv_bytes(dt)),*d=dev((size_t)n*nv_bytes(dt));int32_t*out=dev(4),got=-1;
+        for(int j=0;j<n;j++)nv_pack(h,j,dt,-1.f-(j%17)*.125f);
+        int expected=n==1?0:7;nv_pack(h,expected,dt,3.f);if(n>258)nv_pack(h,258,dt,3.f);
+        CHECK(cudaMemcpyAsync(d,h,(size_t)n*nv_bytes(dt),cudaMemcpyHostToDevice,stream));
+        CHECK(nv_bench_greedy(dt,d,n,out,stream));CHECK(cudaStreamSynchronize(stream));CHECK(cudaMemcpy(&got,out,4,cudaMemcpyDeviceToHost));REQUIRE(got==expected);
+        CHECK(cudaFree(d));CHECK(cudaFree(out));free(h);
+    }
+    CHECK(cudaStreamDestroy(stream));
+}
+void decode_audit(const char*path,mi_dtype dt,int samples){
+    REQUIRE(samples>=5&&samples<=1000);greedy_test(dt);
+    NvModel m;nv_model_load(&m,path);REQUIRE(m.config.seq_len>=161);
+    int blocks=(m.config.seq_len+15)/16;
+    NvCuda g;nv_cuda_init(&g,&m,blocks,16,1,dt,1);NvCache cpu;nv_cache_init(&cpu,&m.config,(NvOptions){blocks,16,1,1,0});fill_prefix(&g,&cpu);
+    int32_t*table=nv_alloc(blocks,4);shuffled(table,blocks);int32_t token=7,len=129;
+    float*ref=reference(&m,&cpu,table,token,len-1,dt);float*expected=nv_alloc(m.config.vocab_size,4);memcpy(expected,ref,(size_t)m.config.vocab_size*4);
+    CHECK(nv_cuda_upload(&g,&token,&len,table));CHECK(nv_cuda_capture(&g));CHECK(cudaGraphLaunch(g.replay,g.stream));CHECK(nv_cuda_download(&g));
+    Error error={0};double atol,rtol;tolerances(dt,&atol,&rtol);
+    for(int j=0;j<m.config.vocab_size;j++)compare(&error,g.h_logits[j],expected[j],atol,rtol,"audit decoder CPU FP64");
+    int expected_id=greedy_cpu(g.h_logits,m.config.vocab_size);
+    int32_t*d_next=dev(4),*h_next;CHECK(cudaMallocHost((void**)&h_next,4));
+    cudaGraph_t full[2];cudaGraphExec_t replay[2];
+    for(int gpu=0;gpu<2;gpu++){
+        envelope(&g,gpu,d_next,h_next);REQUIRE(finish_envelope(&g,gpu,h_next)==expected_id);
+        CHECK(cudaStreamBeginCapture(g.stream,cudaStreamCaptureModeThreadLocal));envelope(&g,gpu,d_next,h_next);
+        CHECK(cudaStreamEndCapture(g.stream,&full[gpu]));CHECK(cudaGraphInstantiate(&replay[gpu],full[gpu],0));
+    }
+    void*flush;size_t flush_bytes;CHECK(nv_bench_cache_init(&flush,&flush_bytes));
+    puts("dtype,scope,mode,hidden,ffn,layers,heads,kv_heads,vocab,seq_len,batch,cache_policy,flush_bytes,samples,p50_wall_us,p95_wall_us,p50_device_us,p95_device_us,graph_nodes,max_abs_err,max_rel_err,greedy_id,sampling_order");
+    /* Same input repeated to isolate submission overhead; not generation TPS.
+     * Flush is synchronized before wall clock starts, so it cannot be counted. */
+    for(int scope=0;scope<3;scope++){
+        /* Warm both paths, then alternate which path runs first in each pair.
+         * Laptop DVFS makes long eager-then-graph batches order-sensitive. */
+        for(int i=0;i<20;i++)for(int order=0;order<2;order++){
+            int graph=(i+order)&1;
+            if(scope){if(graph)CHECK(cudaGraphLaunch(replay[scope-1],g.stream));else envelope(&g,scope==2,d_next,h_next);(void)finish_envelope(&g,scope==2,h_next);}
+            else {if(graph)CHECK(cudaGraphLaunch(g.replay,g.stream));else CHECK(nv_cuda_step(&g));}
+        }CHECK(cudaStreamSynchronize(g.stream));
+        double*wall[2],*device_time[2];cudaEvent_t start,end;
+        for(int graph=0;graph<2;graph++){wall[graph]=nv_alloc(samples,sizeof(double));device_time[graph]=nv_alloc(samples,sizeof(double));}
+        CHECK(cudaEventCreate(&start));CHECK(cudaEventCreate(&end));
+        for(int i=0;i<samples;i++)for(int order=0;order<2;order++){
+            int graph=(i+order)&1;
+            CHECK(nv_bench_cache_flush(flush,flush_bytes,g.stream));CHECK(cudaStreamSynchronize(g.stream));
+            double begin=now_us();CHECK(cudaEventRecord(start,g.stream));
+            if(scope){
+                /* Stable pinned staging addresses, values may change per replay.
+                 * Include the same host staging copies in both full paths. */
+                memcpy(g.h_tokens,&token,4);memcpy(g.h_lengths,&len,4);memcpy(g.h_table,table,(size_t)blocks*4);
+                if(graph)CHECK(cudaGraphLaunch(replay[scope-1],g.stream));else envelope(&g,scope==2,d_next,h_next);
+            }else {if(graph)CHECK(cudaGraphLaunch(g.replay,g.stream));else CHECK(nv_cuda_step(&g));}
+            CHECK(cudaEventRecord(end,g.stream));CHECK(cudaEventSynchronize(end));
+            if(scope)REQUIRE(finish_envelope(&g,scope==2,h_next)==expected_id);
+            wall[graph][i]=now_us()-begin;float ms;CHECK(cudaEventElapsedTime(&ms,start,end));device_time[graph][i]=ms*1000.;
+        }
+        for(int graph=0;graph<2;graph++){
+            size_t nodes=0;CHECK(cudaGraphGetNodes(scope?full[scope-1]:g.graph,NULL,&nodes));
+            printf("%s,%s,%s,%d,%d,%d,%d,%d,%d,%d,1,cold,%zu,%d,%.6f,%.6f,%.6f,%.6f,%zu,%.9g,%.9g,%d,alternating_pairs\n",dtype_name(dt),scope==0?"compute":scope==1?"full_cpu_greedy":"full_gpu_greedy",graph?"graph":"eager",m.config.dim,m.config.hidden_dim,m.config.n_layers,m.config.n_heads,m.config.n_kv_heads,m.config.vocab_size,len,flush_bytes,samples,percentile(wall[graph],samples,.5),percentile(wall[graph],samples,.95),percentile(device_time[graph],samples,.5),percentile(device_time[graph],samples,.95),nodes,error.abs,error.rel,expected_id);fflush(stdout);
+            free(wall[graph]);free(device_time[graph]);
+        }
+        CHECK(nv_cuda_download(&g));for(int j=0;j<m.config.vocab_size;j++)compare(&error,g.h_logits[j],expected[j],atol,rtol,"post-audit decoder");
+        CHECK(cudaEventDestroy(start));CHECK(cudaEventDestroy(end));
+    }
+    /* Reuse the transfer+greedy Graph with NEW lengths and a NEW current-page
+     * binding, crossing both page and split boundaries. Compare every logit. */
+    int positions[]={127,128,129,143,144};
+    for(int i=0;i<5;i++){
+        int pos=positions[i];len=pos+1;token=7+i;
+        if(i==4){int logical=pos/16,tmp=table[logical];table[logical]=table[logical+1];table[logical+1]=tmp;}
+        ref=reference(&m,&cpu,table,token,pos,dt);
+        CHECK(cudaStreamSynchronize(g.stream));memcpy(g.h_tokens,&token,4);memcpy(g.h_lengths,&len,4);memcpy(g.h_table,table,(size_t)blocks*4);
+        CHECK(cudaGraphLaunch(replay[1],g.stream));int sampled=finish_envelope(&g,1,h_next);CHECK(nv_cuda_download(&g));
+        memcpy(expected,g.h_logits,(size_t)m.config.vocab_size*4);
+        CHECK(nv_cuda_step(&g));CHECK(nv_cuda_download(&g));
+        REQUIRE(!memcmp(expected,g.h_logits,(size_t)m.config.vocab_size*4));
+        fprintf(stderr,"PASS dynamic graph_eager_bitwise_equal=1 pos=%d dtype=%s logits=%d\n",pos,dtype_name(dt),m.config.vocab_size);
+        for(int j=0;j<m.config.vocab_size;j++)compare(&error,g.h_logits[j],ref[j],atol,rtol,"dynamic transfer Graph CPU FP64");
+        REQUIRE(sampled==greedy_cpu(g.h_logits,m.config.vocab_size));
+    }
+    Error kv={0};check_kv(&g,&cpu,&kv);
+    fprintf(stderr,"PASS audit decoder dtype=%s layers=%d dynamic_steps=5 logits=%zu max_abs=%.9g max_rel=%.9g KV_slots=%zu KV_abs=%.9g greedy_matches_gpu_logits=1\n",dtype_name(dt),m.config.n_layers,error.n,error.abs,error.rel,kv.n,kv.abs);
+    CHECK(cudaFree(flush));CHECK(cudaFree(d_next));CHECK(cudaFreeHost(h_next));
+    for(int i=0;i<2;i++){CHECK(cudaGraphExecDestroy(replay[i]));CHECK(cudaGraphDestroy(full[i]));}
+    nv_cuda_free(&g);nv_cache_free(&cpu);nv_model_free(&m);free(table);free(expected);
 }

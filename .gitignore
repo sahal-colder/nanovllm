@@ -13,3 +13,6 @@ __pycache__/
 *.sqlite
 *.ncu-rep
 *.ncu-repz
+
+# Nsight Systems runtime locks are not measurement artifacts.
+/benchmarks/audit/**/nsys/tmp/

@@ -1,5 +1,8 @@
 # CUDA 第二轮阶段验收
 
+> 本文为历史归档验收。最新缓存口径、Baseline审计和未完成的新GPU验证见
+> [2026-11-26评测审计](PERFORMANCE_AUDIT_20261126.md)。73.73µs为历史热缓存；新增正式性能已重测，15项sanitizer通过，额外16层Racecheck未完成；BF16限制见最新报告。
+
 实现仓库为 nano-vLLM-C（`~/nanovllm`），按用户后续指示复用其 C11 模型/调度/采样框架。
 MiniInfer-C 保留第一轮成果；本轮未导入其存储层。KV-Fabric 仅更新简历与面试文档。
 

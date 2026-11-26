@@ -1,0 +1,4 @@
+[
+  "/home/wty/nanovllm/build-cuda/bench_decode --audit-decode /home/wty/nanovllm/build-cuda/fixtures/perf.bin f16 100",
+  "/home/wty/nanovllm/build-cuda/bench_decode --audit-decode /home/wty/nanovllm/build-cuda/fixtures/audit16.bin f16 100"
+]

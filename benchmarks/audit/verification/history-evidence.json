@@ -1,0 +1,73 @@
+{
+  "scope": "ARCHIVED evidence only; no new GPU execution or fresh sanitizer claims",
+  "source_checks": {
+    "src/operators/attention.cu": {
+      "historical_source_commit": "327ad86c1aa68c6647b331fc03282519ef0adbef",
+      "historical_blob_matches_recorded_hash": true,
+      "current_matches_historical": false
+    },
+    "src/operators/sgemv.cu": {
+      "historical_source_commit": "327ad86c1aa68c6647b331fc03282519ef0adbef",
+      "historical_blob_matches_recorded_hash": true,
+      "current_matches_historical": true
+    },
+    "src/operators/rmsnorm.cu": {
+      "historical_source_commit": "327ad86c1aa68c6647b331fc03282519ef0adbef",
+      "historical_blob_matches_recorded_hash": true,
+      "current_matches_historical": true
+    },
+    "src/cuda_runtime.c": {
+      "historical_source_commit": "327ad86c1aa68c6647b331fc03282519ef0adbef",
+      "historical_blob_matches_recorded_hash": true,
+      "current_matches_historical": true
+    },
+    "benchmarks/round2/attention_bench.c": {
+      "historical_source_commit": "327ad86c1aa68c6647b331fc03282519ef0adbef",
+      "historical_blob_matches_recorded_hash": true,
+      "current_matches_historical": false
+    },
+    "benchmarks/round2/decode_bench.c": {
+      "historical_source_commit": "327ad86c1aa68c6647b331fc03282519ef0adbef",
+      "historical_blob_matches_recorded_hash": true,
+      "current_matches_historical": false
+    },
+    "benchmarks/operators/bench_operators.c": {
+      "historical_source_commit": "327ad86c1aa68c6647b331fc03282519ef0adbef",
+      "historical_blob_matches_recorded_hash": true,
+      "current_matches_historical": false
+    }
+  },
+  "historical_validation": {
+    "memcheck-final.log": "ERROR SUMMARY: 0 errors",
+    "racecheck-final.log": "0 errors, 0 warnings",
+    "gemv-rms-memcheck.log": "ERROR SUMMARY: 0 errors",
+    "gemv-rms-racecheck.log": "0 errors, 0 warnings",
+    "ctest.log": "100% tests passed, 0 tests failed out of 8"
+  },
+  "historical_ncu_cache_control": "all",
+  "historical_nsys_launches": {
+    "eager": 51,
+    "graph": 1
+  },
+  "evidence_sha256": {
+    "benchmarks/operators/round2-results/attention.csv": "4af1ef42a2685ce3dcc49a58b059c9e5395a6257a4f9e71f3af5f935739704c9",
+    "benchmarks/operators/results/benchmark.csv": "9232518bb4730f7e605ba00f4113102dee51d975c13610a482bb8181f3c3aa2c",
+    "benchmarks/operators/round2-results/decode.csv": "0371936b7b4c38269cd0b1d52833a568b153fe792524ff2fd79c3e6f76fc5d2b",
+    "benchmarks/operators/round2-results/ncu-metrics.csv": "645fd8e5b28b852ccf446df18eafdcb704152a8186584cec64cce87471c8c23c",
+    "benchmarks/operators/round2-results/correctness-final.log": "60a1b17af62c46897e31d7cd6c00083f0b38a2084e3898b06279d15a447649a0",
+    "benchmarks/operators/round2-results/environment.json": "f5499a472534061402fbea55b5d8ee16fb6fbbca68f6f33c23639967dbb28bab",
+    "benchmarks/operators/results/environment.json": "f69a9c32b01a4554b0ac5baca8fa325a36e32e31d19ca70b4020a6f3beca0f61",
+    "benchmarks/operators/round2-results/nsys/decode-graph.sqlite": "9f3265f63b0adf3610dd493d400e4f91a785bcfbfc87115c406834dda054fb54",
+    "benchmarks/operators/round2-results/nsys/decode-graph.nsys-rep": "422143d6aca885598189207d745c711ed18249ba9f2b9f3d1d3dd057cbf689bb",
+    "benchmarks/operators/round2-results/nsys/timeline-summary.json": "c0885d37b6f62f7f21b79016d5ffa52cab687c455a207a1b710bfedc5c90dc5b",
+    "benchmarks/operators/round2-results/attention-ncu/attention-f32.ncu-repz": "a173dd336bab27e42953db87af7e7b95d6da4b0908aa1cfe6e2f7b615c4645b6",
+    "benchmarks/operators/round2-results/attention-ncu/attention-f16.ncu-repz": "001ebb0cecbbb11b8653ac93aec7bbb74ab98d427169fddc83b21dcc073a8a21",
+    "benchmarks/operators/round2-results/attention-ncu/attention-bf16.ncu-repz": "49ec3cf8367a11dcbd17c2a8c9c12c4a7ed0588c0bf9afba9e3ed0702bed48ed",
+    "benchmarks/operators/round2-results/operators-ncu/rms-f32.ncu-repz": "53c9141b023f2fd6eacee4e627af96efd3c4a530dd0900072b89143dabbe4128",
+    "benchmarks/operators/round2-results/operators-ncu/rms-bf16.ncu-repz": "107d4b54dc07b07135b0c12cff3914e5a57442a4cd6837d068e4efb7ec11c20b",
+    "benchmarks/operators/round2-results/operators-ncu/gemv-f32.ncu-repz": "82425d49948b886ab9c643a404ff02c57b8c98d0aa0a6b1264466e5903adda83",
+    "benchmarks/operators/round2-results/operators-ncu/gemv-bf16.ncu-repz": "17f7b2e014041d09bdf170022c85965dae123a02e55029a4c10fe237d18df620",
+    "benchmarks/operators/round2-results/operators-ncu/gemv-f16.ncu-repz": "36594ef92c21905ce17bbbec1d0086c27f2397629ba6f7e49c68d76aa8a0f5d1",
+    "benchmarks/operators/round2-results/operators-ncu/rms-f16.ncu-repz": "a9fd783c9380583be0f642e50d46436a102a8f0c8366b6edbdc9b685ce3faeea"
+  }
+}

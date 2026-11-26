@@ -1,0 +1,10 @@
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 415187 (/home/wty/nanovllm/build-cuda/bench_operators)
+
+==WARNING== An error was reported by the driver:
+==WARNING== Failed to load Nsight Compute CUDA modules.
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU VRAM_bytes=8272019456 SM=8.9 cuBLAS=130800 math=FP32_PEDANTIC graph_event_timing=1
+/home/wty/nanovllm/benchmarks/operators/bench_operators.c:102 cudaMalloc(&c->dw_raw,c->nw*c->bytes): out of memory
+operator,dtype,implementation,m,k,batch,offset,lda,x_stride,y_stride,reference,p50_us,p95_us,ideal_bytes,effective_GiB_s,bandwidth_ratio_to_cublas,max_abs_err,max_rel_err,validated_elements,samples,inner,seed,cache_policy,flush_bytes
+==PROF== Disconnected from process 415187
+==ERROR== The application returned an error code (1).

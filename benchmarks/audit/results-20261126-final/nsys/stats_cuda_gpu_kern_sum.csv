@@ -1,0 +1,9 @@
+Time (%),Total Time (ns),Instances,Avg (ns),Med (ns),Min (ns),Max (ns),StdDev (ns),Name
+56.5,1571949,40,39298.7,39301.0,39205,39397,55.9,"void nv_attention_partition_kernel<__half, (bool)1, (bool)1, (int)1>(const T1 *, T1 *, NvAttention, float *, int, int)"
+24.9,692471,170,4073.4,2832.5,2464,6305,1559.9,"void mi_gemv_vec4_kernel<__half>(const T1 *, const T1 *, T1 *, int, int, int, int, int)"
+5.4,149203,90,1657.8,1680.5,1536,1857,75.5,"void mi_rms_vec4_kernel<__half, (int)1>(const T1 *, const T1 *, T1 *, int, int, int, float)"
+4.3,120687,40,3017.2,3008.5,2944,3073,46.4,"void nv_attention_merge_kernel<__half>(T1 *, const float *, NvAttention, int)"
+3.6,99919,80,1249.0,1248.5,1184,1344,59.1,"void nv_add_kernel<__half>(const T1 *, const T1 *, T1 *, unsigned long)"
+3.1,86736,40,2168.4,2176.0,2080,2241,61.7,"void nv_rope_store_kernel<__half>(const T1 *, T1 *, NvAttention, float)"
+1.7,48165,40,1204.1,1200.5,1120,1280,47.4,"void nv_swiglu_kernel<__half>(const T1 *, T1 *, int, int)"
+0.5,14113,10,1411.3,1408.0,1376,1504,35.2,"void nv_embedding_kernel<__half>(const T1 *, const int *, T1 *, int, int, int, int *)"

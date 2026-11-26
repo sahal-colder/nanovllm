@@ -1,0 +1,16 @@
+{
+  "config": [
+    1024,
+    2816,
+    16,
+    16,
+    4,
+    8192,
+    2048
+  ],
+  "seed": 719,
+  "sha256": "bab083a83076c120b67119f12504e0be8c3bdd6cc8c7fea2a2ba03b2f5cdf443",
+  "bytes": 755634204,
+  "numpy": "2.5.4",
+  "synthetic": true
+}

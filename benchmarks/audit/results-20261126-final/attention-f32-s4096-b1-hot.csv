@@ -1,0 +1,4 @@
+dtype,batch,heads,kv_heads,head_dim,seq_len,implementation,p50_us,p95_us,ideal_bytes,effective_GiB_s,max_abs_err,max_rel_err,samples,cache_policy,flush_bytes
+f32,1,16,4,128,4096,serial_online,2009.088039,2010.143995,16793600,7.784755,7.07805157e-08,0.858194753,100,hot,0
+f32,1,16,4,128,4096,split_online_vec4,73.728003,74.752003,16793600,212.134579,1.11758709e-08,2.04285271,100,hot,0
+f32,1,16,4,128,4096,unsplit_vec4,1809.407949,1810.431957,16793600,8.643854,6.70552254e-08,3.84262625,100,hot,0

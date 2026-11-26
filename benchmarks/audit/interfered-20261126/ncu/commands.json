@@ -1,0 +1,3 @@
+[
+  "ncu --metrics dram__throughput.avg.pct_of_peak_sustained_elapsed,dram__bytes.sum.per_second,dram__bytes_read.sum,dram__bytes_write.sum,sm__warps_active.avg.pct_of_peak_sustained_active,lts__t_sector_hit_rate.pct,gpu__time_duration.sum --clock-control none --export /home/wty/nanovllm/benchmarks/audit/results-20261126/ncu/attention-f32-hot-m0 --replay-mode application --cache-control none --profile-from-start off --kernel-name 'regex:nv_attention_(partition|merge)_kernel' /home/wty/nanovllm/build-cuda/bench_decode --audit-attention f32 4096 1 hot 100 0 --profile"
+]

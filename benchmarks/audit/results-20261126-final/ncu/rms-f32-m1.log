@@ -1,0 +1,12 @@
+ncu --metrics dram__throughput.avg.pct_of_peak_sustained_elapsed,dram__bytes.sum.per_second,dram__bytes_read.sum,dram__bytes_write.sum,sm__warps_active.avg.pct_of_peak_sustained_active,lts__t_sector_hit_rate.pct,gpu__time_duration.sum --clock-control none --export /home/wty/nanovllm/benchmarks/audit/results-20261126-final/ncu/rms-f32-m1 --cache-control all --launch-count 1 --kernel-name regex:mi_rms_vec4_kernel /home/wty/nanovllm/build-cuda/bench_operators --profile rms --dtype f32
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 450247 (/home/wty/nanovllm/build-cuda/bench_operators)
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU VRAM_bytes=8272019456 SM=8.9 cuBLAS=130800 math=FP32_PEDANTIC graph_event_timing=1 L2_bytes=33554432
+==PROF== Profiling "mi_rms_vec4_kernel": 0%....50%....100% - 3 passes
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU SM_count=24 L2_bytes=33554432 eviction_bytes=134217728 memory_bus_bits=128
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU SM_count=24 L2_bytes=33554432 eviction_bytes=134217728 memory_bus_bits=128
+operator,dtype,implementation,m,k,batch,offset,lda,x_stride,y_stride,reference,p50_us,p95_us,ideal_bytes,effective_GiB_s,bandwidth_ratio_to_cublas,max_abs_err,max_rel_err,validated_elements,samples,inner,seed,cache_policy,flush_bytes
+rmsnorm,f32,baseline,128,4096,128,0,4096,4096,4096,cpu_f64,28.672000,28.672000,4210688,136.771371,,2.38418579e-07,2.46005789e-07,524288,1,1,0x739ab21,cold,134217728
+rmsnorm,f32,optimized,128,4096,128,0,4096,4096,4096,cpu_f64,21.536000,21.536000,4210688,182.090861,,2.38418579e-07,2.37990239e-07,524288,1,1,0x739ab21,cold,134217728
+==PROF== Disconnected from process 450247
+==PROF== Report: /home/wty/nanovllm/benchmarks/audit/results-20261126-final/ncu/rms-f32-m1.ncu-repz

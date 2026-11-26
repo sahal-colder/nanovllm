@@ -1,0 +1,29 @@
+case,kernel,dram_pct,dram_GiB_s,read_MiB,write_MiB,occupancy_pct,l2_hit_pct,profiled_duration_us
+attention-bf16-cold-m0,"void nv_attention_partition_kernel<__nv_bfloat16, 0, 0, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",2.513356,5.9870705008506775,128.6693115234375,14.527587890625,8.333332,9.008652,23357.12
+attention-bf16-cold-m1,"void nv_attention_partition_kernel<__nv_bfloat16, 1, 1, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",59.226995,141.07981231063604,146.489990234375,21.353759765625,79.515601,74.444207,1161.824
+attention-bf16-cold-m1,"void nv_attention_merge_kernel<__nv_bfloat16>(T1 *, const float *, NvAttention, int)",82.287058,195.49561385065317,7.119873046875,0.14453125,11.750768,21.859087,36.288000000000004
+attention-bf16-cold-m2,"void nv_attention_partition_kernel<__nv_bfloat16, 1, 0, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",2.373088,5.652927793562412,128.8486328125,14.5350341796875,8.333333,8.936921,24770.016
+attention-f16-cold-m0,"void nv_attention_partition_kernel<__half, 0, 0, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",2.53485,6.03825319558382,129.2772216796875,14.6962890625,8.333332,9.021054,23284.735999999997
+attention-f16-cold-m1,"void nv_attention_partition_kernel<__half, 1, 1, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",63.691949,132.75225460529327,146.482666015625,21.415283203125,79.539244,74.154348,1235.104
+attention-f16-cold-m1,"void nv_attention_merge_kernel<__half>(T1 *, const float *, NvAttention, int)",85.133398,177.2173810750246,7.1187744140625,0.157470703125,11.713026,21.734845,40.096
+attention-f16-cold-m2,"void nv_attention_partition_kernel<__half, 1, 0, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",2.346986,5.59074804186821,128.736328125,14.529541015625,8.333333,8.804131,25024.928
+attention-f32-cold-m0,"void nv_attention_partition_kernel<float, 0, 0, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",2.289451,4.771997220814228,16.242431640625,0.9742431640625,8.333327,5.248879,3523.2960000000003
+attention-f32-cold-m1,"void nv_attention_partition_kernel<float, 1, 1, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",61.522799,146.52199763804674,16.03955078125,1.590576171875,72.332283,75.752845,117.504
+attention-f32-cold-m1,"void nv_attention_merge_kernel<float>(T1 *, const float *, NvAttention, int)",10.213068,20.925654098391533,0.046875,0.0408935546875,13.075164,92.10251,4.096
+attention-f32-cold-m2,"void nv_attention_partition_kernel<float, 1, 0, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",1.896005,4.516454413533211,16.181640625,0.650146484375,8.333324,4.075668,3639.424
+attention-f32-hot-m0,"void nv_attention_partition_kernel<float, 0, 0, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",0.0,0.0,0.0,0.0,8.333322,98.059251,2007.968
+attention-f32-hot-m1,"void nv_attention_partition_kernel<float, 1, 1, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",0.0,0.0,0.0,0.0,64.765598,99.996732,87.584
+attention-f32-hot-m1,"void nv_attention_merge_kernel<float>(T1 *, const float *, NvAttention, int)",0.0,0.0,0.0,0.0,12.381123,99.222395,3.456
+attention-f32-hot-m2,"void nv_attention_partition_kernel<float, 1, 0, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",0.0,0.0,0.0,0.0,8.333318,97.675617,2297.408
+gemv-bf16-m0,"void mi_gemv_scalar_kernel<__nv_bfloat16>(const T1 *, const T1 *, T1 *, int, int, int, int, int)",96.267221,200.6581099703908,64.04052734375,1.0601806640625,97.012583,1.61084,316.832
+gemv-bf16-m1,"void mi_gemv_vec4_kernel<__nv_bfloat16>(const T1 *, const T1 *, T1 *, int, int, int, int, int)",90.555608,215.69112315773964,64.0120849609375,1.3011474609375,97.174096,1.064918,295.712
+gemv-f16-m0,"void mi_gemv_scalar_kernel<__half>(const T1 *, const T1 *, T1 *, int, int, int, int, int)",96.319469,200.75811631977558,64.016845703125,1.0439453125,96.948867,1.619042,316.48
+gemv-f16-m1,"void mi_gemv_vec4_kernel<__half>(const T1 *, const T1 *, T1 *, int, int, int, int, int)",90.565473,215.71359131485224,64.0120849609375,0.9898681640625,97.599156,1.033405,294.272
+gemv-f32-m0,"void mi_gemv_scalar_kernel<float>(const T1 *, const T1 *, T1 *, int, int, int, int, int)",97.121996,202.43531744927168,128.0367431640625,1.0823974609375,98.612574,1.213019,622.88
+gemv-f32-m1,"void mi_gemv_vec4_kernel<float>(const T1 *, const T1 *, T1 *, int, int, int, int, int)",96.715201,230.3712284192443,128.0194091796875,1.050048828125,98.635622,1.158555,547.136
+rms-bf16-m0,"void mi_rms_scalar_kernel<__nv_bfloat16>(const T1 *, const T1 *, T1 *, int, int, int, float)",38.579963,79.78013250976801,1.0247802734375,0.0,86.808541,55.318065,12.544
+rms-bf16-m1,"void mi_rms_vec4_kernel<__nv_bfloat16, 4>(const T1 *, const T1 *, T1 *, int, int, int, float)",56.62042,116.86013266444206,1.0262451171875,0.0,86.604474,54.750192,8.576
+rms-f16-m0,"void mi_rms_scalar_kernel<__half>(const T1 *, const T1 *, T1 *, int, int, int, float)",39.509601,82.08349626511335,1.0247802734375,0.0,87.031097,54.882545,12.192
+rms-f16-m1,"void mi_rms_vec4_kernel<__half, 4>(const T1 *, const T1 *, T1 *, int, int, int, float)",58.137445,120.48448529094459,1.0264892578125,0.0,86.705465,54.768741,8.32
+rms-f32-m0,"void mi_rms_scalar_kernel<float>(const T1 *, const T1 *, T1 *, int, int, int, float)",54.888581,114.23537507653236,2.0325927734375,0.0,86.335282,62.484031,17.376
+rms-f32-m1,"void mi_rms_vec4_kernel<float, 4>(const T1 *, const T1 *, T1 *, int, int, int, float)",67.938153,140.99377114325762,2.0328369140625,0.0,85.768466,54.44591,14.08

@@ -26,6 +26,8 @@ static inline void compare(Error*e,double got,double ref,double atol,double rtol
 }
 int attention_tests(void);
 void attention_benchmark(int profile,int quick,int selected);
+void attention_audit(mi_dtype dt,int length,int batch,int cold,int samples,int method,int profile);
 int decode_tests(const char*root);
-void decode_benchmark(const char*path,int trace);
+void decode_audit(const char*path,mi_dtype dt,int samples);
+void decode_benchmark(const char*path,int trace,int selected);
 #endif

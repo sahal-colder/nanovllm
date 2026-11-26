@@ -1,0 +1,1 @@
+PASS normal CPU-only launch and low-RAM preflight rejection; no GPU kernels launched.

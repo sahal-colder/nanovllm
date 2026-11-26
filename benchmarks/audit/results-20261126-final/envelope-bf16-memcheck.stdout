@@ -1,0 +1,7 @@
+dtype,scope,mode,hidden,ffn,layers,heads,kv_heads,vocab,seq_len,batch,cache_policy,flush_bytes,samples,p50_wall_us,p95_wall_us,p50_device_us,p95_device_us,graph_nodes,max_abs_err,max_rel_err,greedy_id,sampling_order
+bf16,compute,eager,512,1536,4,8,2,512,129,1,cold,134217728,5,4831.329998,4886.365002,4823.040009,4877.312183,52,0,0,7,alternating_pairs
+bf16,compute,graph,512,1536,4,8,2,512,129,1,cold,134217728,5,4315.916000,4341.038002,4308.735847,4333.407879,52,0,0,7,alternating_pairs
+bf16,full_cpu_greedy,eager,512,1536,4,8,2,512,129,1,cold,134217728,5,5904.361000,5936.188000,4874.656200,4888.288021,57,0,0,7,alternating_pairs
+bf16,full_cpu_greedy,graph,512,1536,4,8,2,512,129,1,cold,134217728,5,5379.821003,5449.230000,4339.935780,4389.408112,57,0,0,7,alternating_pairs
+bf16,full_gpu_greedy,eager,512,1536,4,8,2,512,129,1,cold,134217728,5,5953.858002,6025.020000,4894.656181,4917.952061,58,0,0,7,alternating_pairs
+bf16,full_gpu_greedy,graph,512,1536,4,8,2,512,129,1,cold,134217728,5,5459.407001,5495.802002,4373.151779,4384.287834,58,0,0,7,alternating_pairs

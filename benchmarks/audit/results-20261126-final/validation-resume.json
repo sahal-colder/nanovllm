@@ -1,0 +1,10 @@
+{
+  "prior_status": {
+    "status": "running",
+    "error": null,
+    "updated_at": "2026-11-26T08:18:33.489456+00:00"
+  },
+  "reason": "Last-case log had no final summary and its process no longer existed; retained incomplete logs and resumed same binary only.",
+  "command": "compute-sanitizer --tool racecheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/envelope-large-f16-racecheck.log /home/wty/nanovllm/build-cuda/bench_decode --audit-decode /home/wty/nanovllm/build-cuda/fixtures/audit16.bin f16 5",
+  "archive": "/home/wty/nanovllm/benchmarks/audit/results-20261126-final/interrupted-last-case-20261126T084322Z"
+}

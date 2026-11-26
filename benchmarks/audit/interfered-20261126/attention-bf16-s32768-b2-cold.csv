@@ -1,0 +1,3 @@
+dtype,batch,heads,kv_heads,head_dim,seq_len,implementation,p50_us,p95_us,ideal_bytes,effective_GiB_s,max_abs_err,max_rel_err,samples,cache_policy,flush_bytes
+bf16,2,16,4,128,32768,serial_online,23358.783722,24716.384888,134227968,5.351714,1.52587891e-05,0.0115606936,100,cold,134217728
+bf16,2,16,4,128,32768,split_online_vec4,1169.855952,1179.391980,134227968,106.858914,7.4505806e-09,0.00578034682,100,cold,134217728

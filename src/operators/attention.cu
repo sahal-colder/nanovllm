@@ -103,7 +103,7 @@ template<typename T,int G> static void launch_groups(const void*q,void*out,NvAtt
     int capacity=a.max_blocks*a.page_tokens,parts=(capacity-1)/64+1;
     size_t bh=(size_t)a.batch*a.heads;
     if(!opt)nv_attention_partition_kernel<T,false,false,G><<<(bh+3)/4,128,0,s>>>((const T*)q,(T*)out,a,w,1,capacity);
-    else if(parts==1)nv_attention_partition_kernel<T,true,false,G><<<(bh+3)/4,128,0,s>>>((const T*)q,(T*)out,a,w,1,capacity);
+    else if(opt==2||parts==1)nv_attention_partition_kernel<T,true,false,G><<<(bh+3)/4,128,0,s>>>((const T*)q,(T*)out,a,w,1,capacity);
     else {
         nv_attention_partition_kernel<T,true,true,G><<<(bh*parts+3)/4,128,0,s>>>((const T*)q,(T*)out,a,w,parts,64);
         nv_attention_merge_kernel<T><<<bh,256,(size_t)parts*sizeof(float),s>>>((T*)out,w,a,parts);
@@ -116,7 +116,8 @@ extern "C" cudaError_t nv_paged_attention(mi_dtype dtype,const void*q,void*out,N
     if(!nv_shape_ok(a)||!q||!out||!a.d_pages||!a.d_block_table||!a.d_lengths||!a.d_error)return cudaErrorInvalidValue;
     size_t alignment=dtype==MI_F32?4:2;
     if((uintptr_t)q%alignment||(uintptr_t)out%alignment)return cudaErrorInvalidValue;
-    if(opt&&a.max_blocks*a.page_tokens>64&&(!w||(uintptr_t)w%4||bytes<nv_attention_workspace_bytes(&a)))return cudaErrorInvalidValue;
+    if(opt<0||opt>2)return cudaErrorInvalidValue;
+    if(opt==1&&a.max_blocks*a.page_tokens>64&&(!w||(uintptr_t)w%4||bytes<nv_attention_workspace_bytes(&a)))return cudaErrorInvalidValue;
     switch(dtype){
     case MI_F32:launch<float>(q,out,a,w,opt,s);break;
     case MI_F16:launch<__half>(q,out,a,w,opt,s);break;

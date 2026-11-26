@@ -1,0 +1,12 @@
+{
+  "time": "2026-11-26T08:51:07.966013+00:00",
+  "compute": [],
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU, 615.71.09, P3, 2010, 7001, 38, 7, 15, 8188",
+  "host_memory": {
+    "MemTotal_KiB": 16090576,
+    "MemAvailable_KiB": 11391152,
+    "SwapTotal_KiB": 2097148,
+    "SwapFree_KiB": 2097148
+  },
+  "memory_pressure": "some avg10=0.00 avg60=0.00 avg300=0.00 total=28\nfull avg10=0.00 avg60=0.00 avg300=0.00 total=28\n"
+}

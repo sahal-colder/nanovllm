@@ -1,0 +1,5 @@
+{
+  "status": "failed",
+  "error": "Command '[PosixPath('/home/wty/nanovllm/build-cuda/bench_decode'), '--audit-decode', PosixPath('/home/wty/nanovllm/build-cuda/fixtures/audit16.bin'), 'bf16', 100]' returned non-zero exit status 1.",
+  "updated_at": "2026-11-26T08:11:20.684704+00:00"
+}

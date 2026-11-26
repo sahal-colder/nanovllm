@@ -1,0 +1,6 @@
+[
+  "/home/wty/nanovllm/build-cuda/bench_decode --audit-attention f32 4096 1 hot 100 -1",
+  "/home/wty/nanovllm/build-cuda/bench_decode --audit-attention f32 4096 1 cold 100 -1",
+  "/home/wty/nanovllm/build-cuda/bench_decode --audit-attention f16 32768 2 hot 100 -1",
+  "/home/wty/nanovllm/build-cuda/bench_decode --audit-attention f16 32768 2 cold 100 -1"
+]

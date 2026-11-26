@@ -1,4 +1,6 @@
 #include "common.h"
+#include "../audit/cache.h"
+#include <cuda_profiler_api.h>
 typedef struct AttentionCase {
     NvAttention a;mi_dtype dtype;cudaStream_t stream;
     int32_t *table,*lengths;void *h_pages,*h_q,*h_y,*d_arena,*d_qraw,*d_yraw;
@@ -85,48 +87,79 @@ int attention_tests(void){
     const int lengths[]={128,1024,1037,4096},ratios[]={1,4,8};Error total[3]={{0}};int cases=0;
     for(int dt=0;dt<3;dt++)for(int bi=0;bi<2;bi++)for(int r=0;r<3;r++)for(int l=0;l<4;l++){
         AttentionCase c;create(&c,(mi_dtype)dt,bi?3:1,8,8/ratios[r],64,lengths[l],1);
-        for(int opt=0;opt<2;opt++){run(&c,opt);Error e=check(&c,1);total[dt].abs=fmax(total[dt].abs,e.abs);total[dt].rel=fmax(total[dt].rel,e.rel);total[dt].n+=e.n;}
+        for(int opt=0;opt<3;opt++){run(&c,opt);Error e=check(&c,1);total[dt].abs=fmax(total[dt].abs,e.abs);total[dt].rel=fmax(total[dt].rel,e.rel);total[dt].n+=e.n;}
         destroy(&c);cases++;
     }
     const int dims[]={1,31,65,127,128,256},lens[]={0,1,15,16,17,33};
     for(int dt=0;dt<3;dt++)for(int j=0;j<6;j++){
         AttentionCase c;create(&c,(mi_dtype)dt,2,6,2,dims[j],lens[j],j&1);
-        for(int opt=0;opt<2;opt++){run(&c,opt);(void)check(&c,j&1);}
+        for(int opt=0;opt<3;opt++){run(&c,opt);(void)check(&c,j&1);}
         destroy(&c);cases++;
     }
     AttentionCase c;create(&c,MI_F32,1,8,2,65,1037,1);
     REQUIRE(nv_paged_attention(MI_F32,c.d_q,c.d_y,c.a,NULL,0,1,c.stream)==cudaErrorInvalidValue);
+    REQUIRE(nv_paged_attention(MI_F32,c.d_q,c.d_y,c.a,NULL,0,3,c.stream)==cudaErrorInvalidValue);
+    CHECK(nv_paged_attention(MI_F32,c.d_q,c.d_y,c.a,NULL,0,2,c.stream));(void)check(&c,1);
     int bad=-1,flag;CHECK(cudaMemcpy((void*)c.a.d_block_table,&bad,4,cudaMemcpyHostToDevice));run(&c,1);CHECK(cudaStreamSynchronize(c.stream));CHECK(cudaMemcpy(&flag,c.a.d_error,4,cudaMemcpyDeviceToHost));REQUIRE(flag&2);
     CHECK(cudaMemset(c.a.d_error,0,4));bad=c.a.max_blocks*16+1;CHECK(cudaMemcpy((void*)c.a.d_lengths,&bad,4,cudaMemcpyHostToDevice));run(&c,1);CHECK(cudaStreamSynchronize(c.stream));CHECK(cudaMemcpy(&flag,c.a.d_error,4,cudaMemcpyDeviceToHost));REQUIRE(flag&1);destroy(&c);
     fprintf(stderr,"PASS attention cases=%d + invalid-metadata guards, seed=0x82a6371\n",cases);
     for(int dt=0;dt<3;dt++)fprintf(stderr,"attention %s comparisons=%zu max_abs_err=%.9g max_rel_err=%.9g\n",dtype_name(dt),total[dt].n,total[dt].abs,total[dt].rel);
     return 0;
 }
-static void timing(AttentionCase*c,int opt,double*p50,double*p95){
-    enum{INNER=5,REPEATS=60};cudaEvent_t start[INNER],end[INNER];cudaGraph_t graph;cudaGraphExec_t exec;double times[INNER*REPEATS];
-    for(int i=0;i<10;i++)run(c,opt);CHECK(cudaStreamSynchronize(c->stream));
+static size_t measured_flush_bytes=0;
+static void timing(AttentionCase*c,int opt,int cold,int repeats,double*p50,double*p95){
+    enum{INNER=5};void*flush=NULL;size_t flush_bytes=0;
+    if(cold)CHECK(nv_bench_cache_init(&flush,&flush_bytes));
+    measured_flush_bytes=flush_bytes;
+    cudaEvent_t start[INNER],end[INNER];cudaGraph_t graph;cudaGraphExec_t exec;
+    double *times=nv_alloc((size_t)INNER*repeats,sizeof(double));
+    for(int i=0;i<10;i++)run(c,opt);
+    CHECK(cudaStreamSynchronize(c->stream));
     for(int i=0;i<INNER;i++){CHECK(cudaEventCreate(&start[i]));CHECK(cudaEventCreate(&end[i]));}
     CHECK(cudaStreamBeginCapture(c->stream,cudaStreamCaptureModeThreadLocal));
-    for(int i=0;i<INNER;i++){CHECK(cudaEventRecordWithFlags(start[i],c->stream,cudaEventRecordExternal));run(c,opt);CHECK(cudaEventRecordWithFlags(end[i],c->stream,cudaEventRecordExternal));}
+    for(int i=0;i<INNER;i++){if(cold)CHECK(nv_bench_cache_flush(flush,flush_bytes,c->stream));CHECK(cudaEventRecordWithFlags(start[i],c->stream,cudaEventRecordExternal));run(c,opt);CHECK(cudaEventRecordWithFlags(end[i],c->stream,cudaEventRecordExternal));}
     CHECK(cudaStreamEndCapture(c->stream,&graph));CHECK(cudaGraphInstantiate(&exec,graph,0));
-    for(int r=0;r<REPEATS;r++){CHECK(cudaGraphLaunch(exec,c->stream));CHECK(cudaStreamSynchronize(c->stream));for(int i=0;i<INNER;i++){float ms;CHECK(cudaEventElapsedTime(&ms,start[i],end[i]));times[r*INNER+i]=ms*1000.;}}
-    *p50=percentile(times,INNER*REPEATS,.5);*p95=percentile(times,INNER*REPEATS,.95);
-    CHECK(cudaGraphExecDestroy(exec));CHECK(cudaGraphDestroy(graph));for(int i=0;i<INNER;i++){CHECK(cudaEventDestroy(start[i]));CHECK(cudaEventDestroy(end[i]));}
+    for(int r=0;r<repeats;r++){CHECK(cudaGraphLaunch(exec,c->stream));CHECK(cudaStreamSynchronize(c->stream));for(int i=0;i<INNER;i++){float ms;CHECK(cudaEventElapsedTime(&ms,start[i],end[i]));times[r*INNER+i]=ms*1000.;}}
+    *p50=percentile(times,INNER*repeats,.5);*p95=percentile(times,INNER*repeats,.95);
+    free(times);if(flush)CHECK(cudaFree(flush));CHECK(cudaGraphExecDestroy(exec));CHECK(cudaGraphDestroy(graph));for(int i=0;i<INNER;i++){CHECK(cudaEventDestroy(start[i]));CHECK(cudaEventDestroy(end[i]));}
 }
 void attention_benchmark(int profile,int quick,int selected){
     int lengths[]={128,1024,1037,4096},ratios[]={1,4,16};
-    if(!profile)puts("dtype,batch,heads,kv_heads,head_dim,seq_len,implementation,p50_us,p95_us,ideal_bytes,effective_GiB_s,max_abs_err,max_rel_err,samples");
+    if(!profile)puts("dtype,batch,heads,kv_heads,head_dim,seq_len,implementation,p50_us,p95_us,ideal_bytes,effective_GiB_s,max_abs_err,max_rel_err,samples,cache_policy,flush_bytes");
     for(int dt=profile?selected:0;dt<(profile?selected+1:3);dt++)for(int bi=0;bi<(quick?1:2);bi++)for(int ri=0;ri<(quick?1:3);ri++)for(int li=0;li<(quick?1:4);li++){
         AttentionCase c;int len=quick?4096:lengths[li];create(&c,dt,bi?4:1,16,quick?4:16/ratios[ri],128,len,0);
         for(int opt=profile?1:0;opt<2;opt++){
             run(&c,opt);Error e=check(&c,0);double p50=0,p95=0;
-            if(!profile)timing(&c,opt,&p50,&p95);else for(int i=0;i<4;i++)run(&c,opt);
+            if(!profile)timing(&c,opt,1,60,&p50,&p95);else for(int i=0;i<4;i++)run(&c,opt);
             (void)check(&c,0);size_t sum=0;for(int b=0;b<c.a.batch;b++)sum+=c.lengths[b];
             size_t bytes=nv_bytes(dt)*(2*sum*c.a.kv_heads*c.a.head_dim+2*c.n);
-            if(!profile)printf("%s,%d,%d,%d,%d,%d,%s,%.6f,%.6f,%zu,%.6f,%.9g,%.9g,300\n",dtype_name(dt),c.a.batch,c.a.heads,c.a.kv_heads,c.a.head_dim,len,opt?"split_online_vec4":"serial_online",p50,p95,bytes,bytes/(p50*1.e-6)/1073741824.,e.abs,e.rel);
+            if(!profile)printf("%s,%d,%d,%d,%d,%d,%s,%.6f,%.6f,%zu,%.6f,%.9g,%.9g,300,cold,%zu\n",dtype_name(dt),c.a.batch,c.a.heads,c.a.kv_heads,c.a.head_dim,len,opt==2?"unsplit_vec4":opt?"split_online_vec4":"serial_online",p50,p95,bytes,bytes/(p50*1.e-6)/1073741824.,e.abs,e.rel,measured_flush_bytes);
             else fprintf(stderr,"PROFILE validated %s split-online, abs=%.9g rel=%.9g\n",dtype_name(dt),e.abs,e.rel);
             fflush(stdout);
         }
         destroy(&c);
     }
+}
+
+/* Explicit shape/cache/method entry point for audit and profiler. Method -1
+ * compares all three; method 0 is one warp/head, four warps/CTA, NO sequence split. */
+void attention_audit(mi_dtype dt,int length,int batch,int cold,int samples,int method,int profile){
+    REQUIRE(length>=1&&length<=65536&&batch>=1&&batch<=64&&samples>=5&&samples%5==0&&samples<=10000&&method>=-1&&method<=2);
+    AttentionCase c;create(&c,dt,batch,16,4,128,length,0);
+    puts("dtype,batch,heads,kv_heads,head_dim,seq_len,implementation,p50_us,p95_us,ideal_bytes,effective_GiB_s,max_abs_err,max_rel_err,samples,cache_policy,flush_bytes");
+    for(int opt=0;opt<3;opt++){
+        if(method>=0&&opt!=method)continue;
+        run(&c,opt);Error e=check(&c,0);double p50=0,p95=0;
+        if(profile){
+            void*flush=NULL;size_t bytes=0;if(cold)CHECK(nv_bench_cache_init(&flush,&bytes));measured_flush_bytes=bytes;
+            for(int i=0;i<10;i++)run(&c,opt);
+            if(cold)CHECK(nv_bench_cache_flush(flush,bytes,c.stream));
+            CHECK(cudaStreamSynchronize(c.stream));CHECK(cudaProfilerStart());run(&c,opt);
+            CHECK(cudaStreamSynchronize(c.stream));CHECK(cudaProfilerStop());if(flush)CHECK(cudaFree(flush));
+        }else timing(&c,opt,cold,samples/5,&p50,&p95);
+        e=check(&c,0);size_t sum=0;for(int b=0;b<batch;b++)sum+=c.lengths[b];
+        size_t bytes=nv_bytes(dt)*(2*sum*c.a.kv_heads*c.a.head_dim+2*c.n);
+        printf("%s,%d,16,4,128,%d,%s,%.6f,%.6f,%zu,%.6f,%.9g,%.9g,%d,%s,%zu\n",dtype_name(dt),batch,length,opt==2?"unsplit_vec4":opt?"split_online_vec4":"serial_online",p50,p95,bytes,profile?0:bytes/(p50*1.e-6)/1073741824.,e.abs,e.rel,profile?1:samples,cold?"cold":"hot",measured_flush_bytes);
+    }
+    destroy(&c);
 }

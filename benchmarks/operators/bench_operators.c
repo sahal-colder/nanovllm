@@ -3,6 +3,7 @@
  * launch gaps uniformly for baseline, optimized and cuBLAS. */
 #include "miniinfer/operators.h"
 #include <cublas_v2.h>
+#include "../audit/cache.h"
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -12,6 +13,8 @@
 #define CUDA(call) do { cudaError_t e_=(call); if(e_!=cudaSuccess){fprintf(stderr,"%s:%d %s: %s\n",__FILE__,__LINE__,#call,cudaGetErrorString(e_));exit(1);} } while(0)
 #define BLAS(call) do { cublasStatus_t b_=(call); if(b_!=CUBLAS_STATUS_SUCCESS){fprintf(stderr,"%s:%d %s: cuBLAS %d\n",__FILE__,__LINE__,#call,(int)b_);exit(1);} } while(0)
 
+static int cold_cache=1,audit_shape=0;
+static size_t measured_flush_bytes=0;
 static uint32_t rng=0x739ab21u;
 static float random_float(void){rng^=rng<<13;rng^=rng>>17;rng^=rng<<5;return (float)(rng>>8)*(2.f/16777216.f)-1.f;}
 static size_t element_bytes(mi_dtype d){return d==MI_F32?4:2;}
@@ -151,12 +154,16 @@ static errors check_output(op_case*c){
 static int compare_double(const void*a,const void*b){double x=*(const double*)a,y=*(const double*)b;return (x>y)-(x<y);}
 static void measure(const op_case*c,int method,int samples,int inner,double *p50,double*p95){
     cudaGraph_t graph;cudaGraphExec_t replay;
+    void*flush=NULL;size_t flush_bytes=0;
+    if(cold_cache)CUDA(nv_bench_cache_init(&flush,&flush_bytes));
+    measured_flush_bytes=flush_bytes;
     cudaEvent_t *start=allocate((size_t)inner*sizeof(*start)),*end=allocate((size_t)inner*sizeof(*end));
     for(int i=0;i<inner;i++){CUDA(cudaEventCreate(&start[i]));CUDA(cudaEventCreate(&end[i]));}
     for(int i=0;i<10;i++)invoke(c,method);
     CUDA(cudaStreamSynchronize(c->stream));
     CUDA(cudaStreamBeginCapture(c->stream,cudaStreamCaptureModeThreadLocal));
     for(int i=0;i<inner;i++){
+        if(cold_cache)CUDA(nv_bench_cache_flush(flush,flush_bytes,c->stream));
         CUDA(cudaEventRecordWithFlags(start[i],c->stream,cudaEventRecordExternal));
         invoke(c,method);
         CUDA(cudaEventRecordWithFlags(end[i],c->stream,cudaEventRecordExternal));
@@ -176,10 +183,11 @@ static void measure(const op_case*c,int method,int samples,int inner,double *p50
     free(times);
     for(int i=0;i<inner;i++){CUDA(cudaEventDestroy(start[i]));CUDA(cudaEventDestroy(end[i]));}
     free(start);free(end);
+    if(flush)CUDA(cudaFree(flush));
     CUDA(cudaGraphExecDestroy(replay));CUDA(cudaGraphDestroy(graph));
 }
 static void benchmark_case(op_case*c,int samples,int inner){
-    if(c->rms)cpu_reference(c);else blas_reference(c);
+    if(c->rms||audit_shape)cpu_reference(c);else blas_reference(c);
     double median[3]={0},tail[3]={0};errors err[3];int methods=c->rms?2:3;
     /* Rotate order by shape to reduce systematic baseline/optimized clock bias. */
     for(int i=0;i<methods;i++){
@@ -194,10 +202,10 @@ static void benchmark_case(op_case*c,int samples,int inner){
     for(int method=0;method<methods;method++){
         printf("%s,%s,%s,%d,%d,%d,%d,%d,%d,%d,%s,%.6f,%.6f,%.0f,%.6f,",
             c->rms?"rmsnorm":"sgemv",dtype_name(c->dtype),method==0?"baseline":method==1?"optimized":(c->dtype==MI_F32&&c->b==1?"cublasSgemv":"cublasGemmEx"),
-            c->m,c->k,c->rms?c->m:c->b,c->ow,c->lda,c->xs,c->ys,c->rms?"cpu_f64":"cublas",
+            c->m,c->k,c->rms?c->m:c->b,c->ow,c->lda,c->xs,c->ys,c->rms||audit_shape?"cpu_f64":"cublas",
             median[method],tail[method],bytes,bytes/(median[method]*1.e-6)/1073741824.);
         if(!c->rms)printf("%.6f",median[2]/median[method]);
-        printf(",%.9g,%.9g,%zu,%d,%d,0x739ab21\n",err[method].abs,err[method].rel,err[method].count,samples,inner);
+        printf(",%.9g,%.9g,%zu,%d,%d,0x739ab21,%s,%zu\n",err[method].abs,err[method].rel,err[method].count,samples,inner,cold_cache?"cold":"hot",measured_flush_bytes);
     }
     fflush(stdout);
 }
@@ -257,12 +265,14 @@ int main(int argc,char**argv){
     for(int i=1;i<argc;i++){
         if(!strcmp(argv[i],"--test"))test=1;
         else if(!strcmp(argv[i],"--quick"))quick=1;
+        else if(!strcmp(argv[i],"--audit"))audit_shape=1;
+        else if(!strcmp(argv[i],"--cache")&&i+1<argc){const char*v=argv[++i];if(strcmp(v,"cold")&&strcmp(v,"hot"))return 2;cold_cache=!strcmp(v,"cold");}
         else if(!strcmp(argv[i],"--samples")&&i+1<argc)samples=positive(argv[++i]);
         else if(!strcmp(argv[i],"--inner")&&i+1<argc)inner=positive(argv[++i]);
         else if(!strcmp(argv[i],"--op")&&i+1<argc)op=argv[++i];
         else if(!strcmp(argv[i],"--profile")&&i+1<argc){profile=1;op=argv[++i];samples=1;inner=1;}
         else if(!strcmp(argv[i],"--dtype")&&i+1<argc){const char*p=argv[++i];selected=!strcmp(p,"f32")?0:!strcmp(p,"f16")?1:!strcmp(p,"bf16")?2:-2;}
-        else {fprintf(stderr,"usage: %s [--test|--quick|--profile gemv|rms] [--op all|gemv|rms] [--dtype f32|f16|bf16] [--samples N] [--inner N]\n",argv[0]);return 2;}
+        else {fprintf(stderr,"usage: %s [--test|--quick|--audit|--profile gemv|rms] [--cache cold|hot] [--op all|gemv|rms] [--dtype f32|f16|bf16] [--samples N] [--inner N]\n",argv[0]);return 2;}
     }
     if(selected==-2||(strcmp(op,"all")&&strcmp(op,"gemv")&&strcmp(op,"rms")))return 2;
     int count=0;cudaError_t available=cudaGetDeviceCount(&count);
@@ -271,21 +281,21 @@ int main(int argc,char**argv){
     cublasHandle_t h;BLAS(cublasCreate(&h));int version;BLAS(cublasGetVersion(h,&version));
     BLAS(cublasSetMathMode(h,(cublasMath_t)(CUBLAS_PEDANTIC_MATH|CUBLAS_MATH_DISALLOW_REDUCED_PRECISION_REDUCTION)));
     cudaStream_t s;CUDA(cudaStreamCreateWithFlags(&s,cudaStreamNonBlocking));BLAS(cublasSetStream(h,s));
-    fprintf(stderr,"GPU=%s VRAM_bytes=%zu SM=%d.%d cuBLAS=%d math=FP32_PEDANTIC graph_event_timing=1\n",device.name,device.totalGlobalMem,device.major,device.minor,version);
+    fprintf(stderr,"GPU=%s VRAM_bytes=%zu SM=%d.%d cuBLAS=%d math=FP32_PEDANTIC graph_event_timing=1 L2_bytes=%d\n",device.name,device.totalGlobalMem,device.major,device.minor,version,device.l2CacheSize);
     if(test)validation(s,h);
     else {
-        puts("operator,dtype,implementation,m,k,batch,offset,lda,x_stride,y_stride,reference,p50_us,p95_us,ideal_bytes,effective_GiB_s,bandwidth_ratio_to_cublas,max_abs_err,max_rel_err,validated_elements,samples,inner,seed");
+        puts("operator,dtype,implementation,m,k,batch,offset,lda,x_stride,y_stride,reference,p50_us,p95_us,ideal_bytes,effective_GiB_s,bandwidth_ratio_to_cublas,max_abs_err,max_rel_err,validated_elements,samples,inner,seed,cache_policy,flush_bytes");
         const int shapes[][2]={{2048,2048},{4096,4096},{8192,4096},{11008,4096}};
         const int batches[]={1,2,8,32},hidden[]={512,1024,2048,4096,8192,11008},rows[]={1,8,128,512};
         for(int d=0;d<3;d++){
             if(selected>=0&&d!=selected)continue;
-            if(strcmp(op,"rms"))for(int sh=0;sh<(quick||profile?1:4);sh++)for(int bi=0;bi<(quick||profile?1:4);bi++){
-                op_case c;create_case(&c,0,(mi_dtype)d,profile?8192:shapes[sh][0],profile?4096:shapes[sh][1],batches[bi],0,0,s,h);
+            if(strcmp(op,"rms"))for(int sh=0;sh<(quick||profile||audit_shape?1:4);sh++)for(int bi=0;bi<(quick||profile||audit_shape?1:4);bi++){
+                op_case c;create_case(&c,0,(mi_dtype)d,profile||audit_shape?8192:shapes[sh][0],profile||audit_shape?4096:shapes[sh][1],batches[bi],0,0,s,h);
                 benchmark_case(&c,samples,inner?inner:5);destroy_case(&c);
             }
-            if(strcmp(op,"gemv"))for(int hi=0;hi<(quick||profile?1:6);hi++)for(int ri=0;ri<(quick||profile?1:4);ri++){
-                op_case c;create_case(&c,1,(mi_dtype)d,quick||profile?128:rows[ri],quick||profile?4096:hidden[hi],1,0,0,s,h);
-                benchmark_case(&c,samples,inner?inner:64);destroy_case(&c);
+            if(strcmp(op,"gemv"))for(int hi=0;hi<(quick||profile||audit_shape?1:6);hi++)for(int ri=0;ri<(quick||profile||audit_shape?1:4);ri++){
+                op_case c;create_case(&c,1,(mi_dtype)d,quick||profile||audit_shape?128:rows[ri],quick||profile||audit_shape?4096:hidden[hi],1,0,0,s,h);
+                benchmark_case(&c,samples,inner?inner:(cold_cache?5:64));destroy_case(&c);
             }
         }
     }
