@@ -1,0 +1,96 @@
+
+member /tmp/miniinfer-operators-build/libminiinfer_operators.a:sgemv.cu.o:
+
+Fatbin ptx code:
+================
+arch = sm_89
+code version = [9,4]
+host = linux
+compile_size = 64bit
+compressed
+identifier = /tmp/miniinfer-operators/src/operators/sgemv.cu
+ptxasOptions =  --generate-line-info 
+
+Fatbin elf code:
+================
+arch = sm_89
+code version = [1,8]
+host = linux
+compile_size = 64bit
+identifier = /tmp/miniinfer-operators/src/operators/sgemv.cu
+
+Resource usage:
+ Common:
+  GLOBAL:0
+ Function _Z21mi_gemv_scalar_kernelI13__nv_bfloat16EvPKT_S3_PS1_iiiii:
+  REG:27 STACK:0 SHARED:1024 LOCAL:0 CONSTANT[0]:396 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z19mi_gemv_vec4_kernelI13__nv_bfloat16EvPKT_S3_PS1_iiiii:
+  REG:29 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:396 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z21mi_gemv_scalar_kernelI6__halfEvPKT_S3_PS1_iiiii:
+  REG:25 STACK:0 SHARED:1024 LOCAL:0 CONSTANT[0]:396 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z19mi_gemv_vec4_kernelI6__halfEvPKT_S3_PS1_iiiii:
+  REG:29 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:396 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z21mi_gemv_scalar_kernelIfEvPKT_S2_PS0_iiiii:
+  REG:26 STACK:0 SHARED:1024 LOCAL:0 CONSTANT[0]:396 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z19mi_gemv_vec4_kernelIfEvPKT_S2_PS0_iiiii:
+  REG:28 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:396 TEXTURE:0 SURFACE:0 SAMPLER:0
+
+member /tmp/miniinfer-operators-build/libminiinfer_operators.a:rmsnorm.cu.o:
+
+Fatbin ptx code:
+================
+arch = sm_89
+code version = [9,4]
+host = linux
+compile_size = 64bit
+compressed
+identifier = /tmp/miniinfer-operators/src/operators/rmsnorm.cu
+ptxasOptions =  --generate-line-info 
+
+Fatbin elf code:
+================
+arch = sm_89
+code version = [1,8]
+host = linux
+compile_size = 64bit
+identifier = /tmp/miniinfer-operators/src/operators/rmsnorm.cu
+
+Resource usage:
+ Common:
+  GLOBAL:0
+ Function _Z18mi_rms_vec4_kernelI13__nv_bfloat16Li16EEvPKT_S3_PS1_iiif:
+  REG:83 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI13__nv_bfloat16Li8EEvPKT_S3_PS1_iiif:
+  REG:54 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI13__nv_bfloat16Li4EEvPKT_S3_PS1_iiif:
+  REG:40 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI13__nv_bfloat16Li2EEvPKT_S3_PS1_iiif:
+  REG:35 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI13__nv_bfloat16Li1EEvPKT_S3_PS1_iiif:
+  REG:27 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z20mi_rms_scalar_kernelI13__nv_bfloat16EvPKT_S3_PS1_iiif:
+  REG:33 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI6__halfLi16EEvPKT_S3_PS1_iiif:
+  REG:83 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI6__halfLi8EEvPKT_S3_PS1_iiif:
+  REG:54 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI6__halfLi4EEvPKT_S3_PS1_iiif:
+  REG:40 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI6__halfLi2EEvPKT_S3_PS1_iiif:
+  REG:35 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI6__halfLi1EEvPKT_S3_PS1_iiif:
+  REG:27 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z20mi_rms_scalar_kernelI6__halfEvPKT_S3_PS1_iiif:
+  REG:34 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelIfLi16EEvPKT_S2_PS0_iiif:
+  REG:83 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelIfLi8EEvPKT_S2_PS0_iiif:
+  REG:52 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelIfLi4EEvPKT_S2_PS0_iiif:
+  REG:39 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelIfLi2EEvPKT_S2_PS0_iiif:
+  REG:35 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelIfLi1EEvPKT_S2_PS0_iiif:
+  REG:27 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z20mi_rms_scalar_kernelIfEvPKT_S2_PS0_iiif:
+  REG:39 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0

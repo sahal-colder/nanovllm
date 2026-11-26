@@ -1,0 +1,6 @@
+Failed to create directory "/tmp/nvidia/nsight_systems": 权限不够
+
+NOTE: If you are using a system that does not allow writing to "/tmp" or
+where the "/tmp" directory has limited storage you can use the NSYS_TMPDIR
+environment variable to set a custom location for all nsys temporary files.
+The TMPDIR environment variable is also respected as a fallback on Linux.

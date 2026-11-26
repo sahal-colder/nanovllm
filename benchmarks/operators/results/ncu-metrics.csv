@@ -1,0 +1,7 @@
+operator,dtype,dram_pct,dram_bytes_s,dram_GiB_s,achieved_occupancy_pct,kernel,source_csv,report
+gemv,f32,96.607273,247068996000.0,230.10093346238136,98.562922,"void mi_gemv_vec4_kernel<float>(const T1 *, const T1 *, T1 *, int, int, int, int, int)",gemv-f32.csv,gemv-f32.ncu-repz
+gemv,f16,90.819588,203241945000.0,189.28381148725748,97.349781,"void mi_gemv_vec4_kernel<__half>(const T1 *, const T1 *, T1 *, int, int, int, int, int)",gemv-f16.csv,gemv-f16.ncu-repz
+gemv,bf16,90.48033,231403322000.0,215.5111376196146,97.0921,"void mi_gemv_vec4_kernel<__nv_bfloat16>(const T1 *, const T1 *, T1 *, int, int, int, int, int)",gemv-bf16.csv,gemv-bf16.ncu-repz
+rms,f32,65.890032,146757709000.0,136.67876739054918,85.791442,"void mi_rms_vec4_kernel<float, 4>(const T1 *, const T1 *, T1 *, int, int, int, float)",rms-f32.csv,rms-f32.ncu-repz
+rms,f16,53.43623,118911661000.0,110.74511427432299,86.920069,"void mi_rms_vec4_kernel<__half, 4>(const T1 *, const T1 *, T1 *, int, int, int, float)",rms-f16.csv,rms-f16.ncu-repz
+rms,bf16,53.423526,118883392000.0,110.71878671646118,86.791719,"void mi_rms_vec4_kernel<__nv_bfloat16, 4>(const T1 *, const T1 *, T1 *, int, int, int, float)",rms-bf16.csv,rms-bf16.ncu-repz

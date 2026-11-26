@@ -1,0 +1,5 @@
+$ /tmp/nano-r2-build/nanovllm /tmp/nano-r2-models/stories260K.bin -z /tmp/nano-r2-models/tok512.bin -n 32 -t 0 --ids --ignore-eos --batch 2 --budget 16 -i Once upon a time -i A little girl -i The cat -i One day there was a boy
+execution=cpu dtype=0 (scheduler batches remain serial per request)
+model: dim=64 layers=5 heads=8 kv_heads=4 vocab=512 context=512
+KV pool: 2.50 MiB; requests=4 (CPU serial forwards within scheduling batches)
+generated=128 forwards=149 reused=0 preemptions=0 elapsed=0.012s output_tok/s=10908.02

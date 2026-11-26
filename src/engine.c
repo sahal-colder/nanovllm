@@ -3,6 +3,22 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef NANO_WITH_CUDA
+#include "nv_cuda.h"
+#endif
+
+int nv_engine_use_cuda(NvEngine *e,int dtype,int graph){
+#ifdef NANO_WITH_CUDA
+    if(e->cuda||e->num_requests||dtype<0||dtype>2)return 0;
+    e->cuda=nv_alloc(1,sizeof(NvCuda));
+    nv_cuda_init(e->cuda,e->model,e->options.num_blocks,e->options.block_size,1,(mi_dtype)dtype,graph);
+    /* Keep the original block ref/LRU metadata, discard unused CPU KV tensors. */
+    free(e->cache.keys);free(e->cache.values);e->cache.keys=NULL;e->cache.values=NULL;
+    return 1;
+#else
+    (void)e;(void)dtype;(void)graph;return 0;
+#endif
+}
 
 void nv_engine_init(NvEngine *e, NvModel *m, NvOptions o) {
     if (o.num_blocks <= 0 || o.block_size <= 0 || o.block_size > m->config.seq_len ||
@@ -13,6 +29,9 @@ void nv_engine_init(NvEngine *e, NvModel *m, NvOptions o) {
 }
 
 void nv_engine_free(NvEngine *e) {
+#ifdef NANO_WITH_CUDA
+    if(e->cuda){nv_cuda_free(e->cuda);free(e->cuda);}
+#endif
     for (int i = 0; i < e->num_requests; i++) {
         free(e->requests[i]->tokens);
         free(e->requests[i]->block_table);
@@ -102,8 +121,12 @@ int nv_engine_step(NvEngine *e) {
                 s->block_table[s->num_blocks++] = block;
             }
 
-            float *logits = nv_forward(e->model, &e->cache, s->block_table,
-                                      s->tokens[s->computed], s->computed);
+            float *logits;
+#ifdef NANO_WITH_CUDA
+            if(e->cuda)logits=nv_cuda_forward(e->cuda,s->block_table,s->tokens[s->computed],s->computed);
+            else
+#endif
+            logits=nv_forward(e->model,&e->cache,s->block_table,s->tokens[s->computed],s->computed);
             s->computed++;
             used++;
             e->forward_tokens++;

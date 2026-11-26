@@ -1,0 +1,33 @@
+mkdir -p /tmp/nano-cpu-make
+cc -Iinclude -O3 -std=c11 -Wall -Wextra -Wpedantic src/main.c src/model.c src/tokenizer.c src/cache.c src/sampler.c src/engine.c -lm -o /tmp/nano-cpu-make/nanovllm
+mkdir -p /tmp/nano-cpu-make
+cc -Iinclude -O3 -std=c11 -Wall -Wextra -Wpedantic tests/test_engine.c src/model.c src/tokenizer.c src/cache.c src/sampler.c src/engine.c -lm -o /tmp/nano-cpu-make/test_engine
+mkdir -p /tmp/nano-cpu-make
+cc -Iinclude -O3 -std=c11 -Wall -Wextra -Wpedantic tests/test_tokenizer.c src/model.c src/tokenizer.c src/cache.c src/sampler.c src/engine.c -lm -o /tmp/nano-cpu-make/test_tokenizer
+cd tests && python3 fixtures.py /tmp/nano-cpu-make/fixtures
+Created MHA/GQA fixtures and independent dense logits oracle
+cd tests && /tmp/nano-cpu-make/test_tokenizer /tmp/nano-cpu-make/fixtures/tokenizer.bin
+encode("") -> 1
+encode("a") -> 1 259 260
+encode("ab") -> 1 259 262
+encode("abab") -> 1 259 262 262
+encode("é") -> 1 259 198 172
+PASS tokenizer: BOS, dummy prefix, BPE, byte decoding, UTF-8 roundtrip
+cd tests && /tmp/nano-cpu-make/test_engine /tmp/nano-cpu-make/fixtures
+PASS gqa dense oracle, max logit error 2.98023224e-07
+PASS mha dense oracle, max logit error 2.38418579e-07
+PASS BPE merge, UTF-8 byte fallback, BOS/dummy prefix
+PASS greedy and top-p nucleus sampling
+PASS serial/batch/cache token equivalence
+PASS serial/batch/cache token equivalence
+PASS KV pressure/preemption/replay token equivalence
+PASS KV pressure/preemption/replay token equivalence
+PASS KV pressure/preemption/replay token equivalence
+PASS KV pressure/preemption/replay token equivalence
+PASS live admission, cancellation, idle prefix reuse, input bounds
+PASS varied page sizes, one-token budgets, full context boundary
+PASS prefix hash separation and reuse after block recycling
+All C tests passed
+cd tests && python3 test_cli.py /tmp/nano-cpu-make/nanovllm /tmp/nano-cpu-make/fixtures
+PASS EOS termination and ignore-eos
+PASS CLI validation, malformed checkpoints/tokenizers, deterministic output, UTF-8

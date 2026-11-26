@@ -1,0 +1,210 @@
+
+member /tmp/nano-r2-build/libnano_operators.a:sgemv.cu.o:
+
+Fatbin ptx code:
+================
+arch = sm_89
+code version = [9,4]
+host = linux
+compile_size = 64bit
+compressed
+identifier = /tmp/nano-round2/src/operators/sgemv.cu
+ptxasOptions =  --generate-line-info 
+
+Fatbin elf code:
+================
+arch = sm_89
+code version = [1,8]
+host = linux
+compile_size = 64bit
+identifier = /tmp/nano-round2/src/operators/sgemv.cu
+
+Resource usage:
+ Common:
+  GLOBAL:0
+ Function _Z21mi_gemv_scalar_kernelI13__nv_bfloat16EvPKT_S3_PS1_iiiii:
+  REG:27 STACK:0 SHARED:1024 LOCAL:0 CONSTANT[0]:396 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z19mi_gemv_vec4_kernelI13__nv_bfloat16EvPKT_S3_PS1_iiiii:
+  REG:29 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:396 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z21mi_gemv_scalar_kernelI6__halfEvPKT_S3_PS1_iiiii:
+  REG:25 STACK:0 SHARED:1024 LOCAL:0 CONSTANT[0]:396 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z19mi_gemv_vec4_kernelI6__halfEvPKT_S3_PS1_iiiii:
+  REG:29 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:396 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z21mi_gemv_scalar_kernelIfEvPKT_S2_PS0_iiiii:
+  REG:26 STACK:0 SHARED:1024 LOCAL:0 CONSTANT[0]:396 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z19mi_gemv_vec4_kernelIfEvPKT_S2_PS0_iiiii:
+  REG:28 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:396 TEXTURE:0 SURFACE:0 SAMPLER:0
+
+member /tmp/nano-r2-build/libnano_operators.a:rmsnorm.cu.o:
+
+Fatbin ptx code:
+================
+arch = sm_89
+code version = [9,4]
+host = linux
+compile_size = 64bit
+compressed
+identifier = /tmp/nano-round2/src/operators/rmsnorm.cu
+ptxasOptions =  --generate-line-info 
+
+Fatbin elf code:
+================
+arch = sm_89
+code version = [1,8]
+host = linux
+compile_size = 64bit
+identifier = /tmp/nano-round2/src/operators/rmsnorm.cu
+
+Resource usage:
+ Common:
+  GLOBAL:0
+ Function _Z18mi_rms_vec4_kernelI13__nv_bfloat16Li16EEvPKT_S3_PS1_iiif:
+  REG:83 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI13__nv_bfloat16Li8EEvPKT_S3_PS1_iiif:
+  REG:54 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI13__nv_bfloat16Li4EEvPKT_S3_PS1_iiif:
+  REG:40 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI13__nv_bfloat16Li2EEvPKT_S3_PS1_iiif:
+  REG:35 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI13__nv_bfloat16Li1EEvPKT_S3_PS1_iiif:
+  REG:27 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z20mi_rms_scalar_kernelI13__nv_bfloat16EvPKT_S3_PS1_iiif:
+  REG:33 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI6__halfLi16EEvPKT_S3_PS1_iiif:
+  REG:83 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI6__halfLi8EEvPKT_S3_PS1_iiif:
+  REG:54 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI6__halfLi4EEvPKT_S3_PS1_iiif:
+  REG:40 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI6__halfLi2EEvPKT_S3_PS1_iiif:
+  REG:35 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelI6__halfLi1EEvPKT_S3_PS1_iiif:
+  REG:27 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z20mi_rms_scalar_kernelI6__halfEvPKT_S3_PS1_iiif:
+  REG:34 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelIfLi16EEvPKT_S2_PS0_iiif:
+  REG:83 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelIfLi8EEvPKT_S2_PS0_iiif:
+  REG:52 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelIfLi4EEvPKT_S2_PS0_iiif:
+  REG:39 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelIfLi2EEvPKT_S2_PS0_iiif:
+  REG:35 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z18mi_rms_vec4_kernelIfLi1EEvPKT_S2_PS0_iiif:
+  REG:27 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z20mi_rms_scalar_kernelIfEvPKT_S2_PS0_iiif:
+  REG:39 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:392 TEXTURE:0 SURFACE:0 SAMPLER:0
+
+member /tmp/nano-r2-build/libnano_operators.a:attention.cu.o:
+
+Fatbin ptx code:
+================
+arch = sm_89
+code version = [9,4]
+host = linux
+compile_size = 64bit
+compressed
+identifier = /tmp/nano-round2/src/operators/attention.cu
+ptxasOptions =  --generate-line-info 
+
+Fatbin elf code:
+================
+arch = sm_89
+code version = [1,8]
+host = linux
+compile_size = 64bit
+identifier = /tmp/nano-round2/src/operators/attention.cu
+
+Resource usage:
+ Common:
+  GLOBAL:0
+ Function _Z29nv_attention_partition_kernelI13__nv_bfloat16Lb1ELb1ELi2EEvPKT_PS1_11NvAttentionPfii:
+  REG:56 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelI13__nv_bfloat16Lb1ELb0ELi2EEvPKT_PS1_11NvAttentionPfii:
+  REG:55 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelI13__nv_bfloat16Lb0ELb0ELi2EEvPKT_PS1_11NvAttentionPfii:
+  REG:56 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z25nv_attention_merge_kernelI13__nv_bfloat16EvPT_PKf11NvAttentioni:
+  REG:42 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:436 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelI13__nv_bfloat16Lb1ELb1ELi1EEvPKT_PS1_11NvAttentionPfii:
+  REG:44 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelI13__nv_bfloat16Lb1ELb0ELi1EEvPKT_PS1_11NvAttentionPfii:
+  REG:46 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelI13__nv_bfloat16Lb0ELb0ELi1EEvPKT_PS1_11NvAttentionPfii:
+  REG:45 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelI6__halfLb1ELb1ELi2EEvPKT_PS1_11NvAttentionPfii:
+  REG:56 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelI6__halfLb1ELb0ELi2EEvPKT_PS1_11NvAttentionPfii:
+  REG:55 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelI6__halfLb0ELb0ELi2EEvPKT_PS1_11NvAttentionPfii:
+  REG:56 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z25nv_attention_merge_kernelI6__halfEvPT_PKf11NvAttentioni:
+  REG:42 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:436 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelI6__halfLb1ELb1ELi1EEvPKT_PS1_11NvAttentionPfii:
+  REG:44 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelI6__halfLb1ELb0ELi1EEvPKT_PS1_11NvAttentionPfii:
+  REG:46 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelI6__halfLb0ELb0ELi1EEvPKT_PS1_11NvAttentionPfii:
+  REG:44 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelIfLb1ELb1ELi2EEvPKT_PS0_11NvAttentionPfii:
+  REG:55 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelIfLb1ELb0ELi2EEvPKT_PS0_11NvAttentionPfii:
+  REG:55 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelIfLb0ELb0ELi2EEvPKT_PS0_11NvAttentionPfii:
+  REG:56 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z25nv_attention_merge_kernelIfEvPT_PKf11NvAttentioni:
+  REG:42 STACK:0 SHARED:64 LOCAL:0 CONSTANT[0]:436 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelIfLb1ELb1ELi1EEvPKT_PS0_11NvAttentionPfii:
+  REG:44 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelIfLb1ELb0ELi1EEvPKT_PS0_11NvAttentionPfii:
+  REG:48 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z29nv_attention_partition_kernelIfLb0ELb0ELi1EEvPKT_PS0_11NvAttentionPfii:
+  REG:44 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:448 TEXTURE:0 SURFACE:0 SAMPLER:0
+
+member /tmp/nano-r2-build/libnano_operators.a:decode_ops.cu.o:
+
+Fatbin ptx code:
+================
+arch = sm_89
+code version = [9,4]
+host = linux
+compile_size = 64bit
+compressed
+identifier = /tmp/nano-round2/src/operators/decode_ops.cu
+ptxasOptions =  --generate-line-info 
+
+Fatbin elf code:
+================
+arch = sm_89
+code version = [1,8]
+host = linux
+compile_size = 64bit
+identifier = /tmp/nano-round2/src/operators/decode_ops.cu
+
+Resource usage:
+ Common:
+  GLOBAL:0
+ Function _Z19nv_embedding_kernelI13__nv_bfloat16EvPKT_PKiPS1_iiiPi:
+  REG:16 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:400 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z19nv_embedding_kernelI6__halfEvPKT_PKiPS1_iiiPi:
+  REG:16 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:400 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z19nv_embedding_kernelIfEvPKT_PKiPS0_iiiPi:
+  REG:16 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:400 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z16nv_swiglu_kernelI13__nv_bfloat16EvPKT_PS1_ii:
+  REG:18 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:376 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z16nv_swiglu_kernelI6__halfEvPKT_PS1_ii:
+  REG:18 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:376 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z16nv_swiglu_kernelIfEvPKT_PS0_ii:
+  REG:18 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:376 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z13nv_add_kernelI13__nv_bfloat16EvPKT_S3_PS1_m:
+  REG:18 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:384 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z13nv_add_kernelI6__halfEvPKT_S3_PS1_m:
+  REG:18 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:384 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z13nv_add_kernelIfEvPKT_S2_PS0_m:
+  REG:16 STACK:0 SHARED:0 LOCAL:0 CONSTANT[0]:384 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z20nv_rope_store_kernelI13__nv_bfloat16EvPKT_PS1_11NvAttentionf:
+  REG:28 STACK:32 SHARED:0 LOCAL:0 CONSTANT[2]:8 CONSTANT[0]:436 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z20nv_rope_store_kernelI6__halfEvPKT_PS1_11NvAttentionf:
+  REG:28 STACK:32 SHARED:0 LOCAL:0 CONSTANT[2]:8 CONSTANT[0]:436 TEXTURE:0 SURFACE:0 SAMPLER:0
+ Function _Z20nv_rope_store_kernelIfEvPKT_PS0_11NvAttentionf:
+  REG:28 STACK:32 SHARED:0 LOCAL:0 CONSTANT[2]:8 CONSTANT[0]:436 TEXTURE:0 SURFACE:0 SAMPLER:0

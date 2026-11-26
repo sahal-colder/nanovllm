@@ -1,0 +1,9 @@
+$ /usr/local/cuda/bin/ncu --metrics dram__throughput.avg.pct_of_peak_sustained_elapsed,dram__bytes.sum.per_second,sm__warps_active.avg.pct_of_peak_sustained_active --kernel-name regex:mi_rms_vec4_kernel --launch-count 1 --clock-control none --cache-control all --export /tmp/miniinfer-operators/benchmarks/operators/results/ncu/rms-f16 /tmp/miniinfer-operators-build/bench_operators --profile rms --dtype f16
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 224342 (/tmp/miniinfer-operators-build/bench_operators)
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU VRAM_bytes=8272019456 SM=8.9 cuBLAS=130800 math=FP32_PEDANTIC graph_event_timing=1
+==ERROR== ERR_NVGPUCTRPERM - The user does not have permission to access NVIDIA GPU Performance Counters on the target device 0. For instructions on enabling permissions and to get more information see https://developer.nvidia.com/ERR_NVGPUCTRPERM
+operator,dtype,implementation,m,k,batch,offset,lda,x_stride,y_stride,reference,p50_us,p95_us,ideal_bytes,effective_GiB_s,bandwidth_ratio_to_cublas,max_abs_err,max_rel_err,validated_elements,samples,inner,seed
+rmsnorm,f16,baseline,128,4096,128,0,4096,4096,4096,cpu_f64,68.736002,68.736002,2105344,28.525872,,0.0009765625,0.000974658869,524288,1,1,0x739ab21
+rmsnorm,f16,optimized,128,4096,128,0,4096,4096,4096,cpu_f64,149.599999,149.599999,2105344,13.106647,,0.0009765625,0.000974658869,524288,1,1,0x739ab21
+==PROF== Disconnected from process 224342

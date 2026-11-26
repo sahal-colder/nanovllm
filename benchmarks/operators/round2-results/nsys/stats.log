@@ -1,0 +1,7 @@
+Generating SQLite file benchmarks/operators/round2-results/nsys/decode-graph.sqlite from benchmarks/operators/round2-results/nsys/decode-graph.nsys-rep
+Processing [benchmarks/operators/round2-results/nsys/decode-graph.sqlite] with [/opt/nvidia/nsight-systems/2026.3.2/target-linux-x64/reports/cuda_api_sum.py] to [benchmarks/operators/round2-results/nsys/stats_cuda_api_sum.csv]... PROCESSED
+
+Processing [benchmarks/operators/round2-results/nsys/decode-graph.sqlite] with [/opt/nvidia/nsight-systems/2026.3.2/target-linux-x64/reports/cuda_gpu_kern_sum.py] to [benchmarks/operators/round2-results/nsys/stats_cuda_gpu_kern_sum.csv]... PROCESSED
+
+Processing [benchmarks/operators/round2-results/nsys/decode-graph.sqlite] with [/opt/nvidia/nsight-systems/2026.3.2/target-linux-x64/reports/nvtx_sum.py] to [benchmarks/operators/round2-results/nsys/stats_nvtx_sum.csv]... PROCESSED
+

@@ -1,0 +1,10 @@
+$ /usr/local/cuda/bin/ncu --metrics dram__throughput.avg.pct_of_peak_sustained_elapsed,dram__bytes.sum.per_second,sm__warps_active.avg.pct_of_peak_sustained_active --kernel-name regex:mi_rms_vec4_kernel --launch-count 1 --clock-control none --cache-control all --export /tmp/nano-round2/benchmarks/operators/round2-results/operators-ncu/rms-bf16 /tmp/nano-r2-build/bench_operators --profile rms --dtype bf16
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 220680 (/tmp/nano-r2-build/bench_operators)
+GPU=NVIDIA GeForce RTX 4060 Laptop GPU VRAM_bytes=8272019456 SM=8.9 cuBLAS=130800 math=FP32_PEDANTIC graph_event_timing=1
+==PROF== Profiling "mi_rms_vec4_kernel": 0%....50%....100% - 1 pass
+operator,dtype,implementation,m,k,batch,offset,lda,x_stride,y_stride,reference,p50_us,p95_us,ideal_bytes,effective_GiB_s,bandwidth_ratio_to_cublas,max_abs_err,max_rel_err,validated_elements,samples,inner,seed
+rmsnorm,bf16,baseline,128,4096,128,0,4096,4096,4096,cpu_f64,48.735999,48.735999,2105344,40.232158,,0.0078125,0.00549450549,524288,1,1,0x739ab21
+rmsnorm,bf16,optimized,128,4096,128,0,4096,4096,4096,cpu_f64,61.824001,61.824001,2105344,31.715100,,0.0078125,0.00537634409,524288,1,1,0x739ab21
+==PROF== Disconnected from process 220680
+==PROF== Report: /tmp/nano-round2/benchmarks/operators/round2-results/operators-ncu/rms-bf16.ncu-repz

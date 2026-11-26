@@ -1,0 +1,33 @@
+{
+  "collected_at": "2026-11-25T22:33:54.060985+08:00",
+  "devices": [
+    {
+      "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "memory.total": "8188",
+      "driver_version": "615.71.09",
+      "pstate": "P3",
+      "clocks.sm": "2010",
+      "clocks.mem": "7001",
+      "temperature.gpu": "38"
+    }
+  ],
+  "nvcc": "nvcc: NVIDIA (R) Cuda compiler driver\nCopyright (c) 2005-2026 NVIDIA Corporation\nBuilt on Tue_Sep_01_08:45:21_PDT_2026\nCuda compilation tools, release 13.4, V13.4.92\nBuild cuda_13.4.r13.4/compiler.38855100_0",
+  "ncu": "NVIDIA (R) Nsight Compute Command Line Profiler\nCopyright (c) 2018-2026 NVIDIA Corporation\nVersion 2026.3.1.0 (build 38829034) (public-release)",
+  "cmake": "cmake version 3.22.1\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake).",
+  "cc": "cc (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0\nCopyright (C) 2021 Free Software Foundation, Inc.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.",
+  "cublas_version": 130800,
+  "original_head": "cb17fd4bfbca1080788ab895174489f860123307",
+  "source_sha256": {
+    "CMakeLists.txt": "c54db6bdf739d15b5e1ee61f36150b4112b868587cd7f05021ec46ca01c60d11",
+    "include/miniinfer/operators.h": "6f6aea290f2a692bbc9c1e95bb21555baf324b58a75e7abe6b82a97e888566f5",
+    "src/operators/rmsnorm.cu": "64b1603744d631be455e9c3fdcd087068127b85d6df2139053781dbbf91f9fe1",
+    "src/operators/sgemv.cu": "4f8071b1ac080e680086d897a66d616b60a1ca86679620f07999a41dd83ead8e",
+    "src/operators/vector.cuh": "161729cdfd21b5d74fd563afc6a10828afe557ccdada50fcd76490648d65c882",
+    "benchmarks/operators/bench_operators.c": "8c5167fbd645280d8b74b3bfcc6e4e5122239cce099a95dbebf50079a2445230",
+    "benchmarks/operators/profile_ncu.py": "dfa8606d866428140e93f0a3554a69fe3e93eea3f1e9e5f86c19ae91a1d9ca46",
+    "benchmarks/operators/record_environment.py": "a3390603bb9f54ebc5d120aa5a51f3da80ff2fb236667252553570c19350aaf2",
+    "benchmarks/operators/summarize.py": "acc920fe0e311fd58d56a0229ce3230edfe19fa4d80a629fc1271cc0cb0bbf1f"
+  },
+  "benchmark_binary": "/tmp/miniinfer-operators-build/bench_operators",
+  "benchmark_binary_sha256": "8bce6ff968b016bc588daf63f7af8560dfd9f9ed04c7d21a78236d5797549ea6"
+}

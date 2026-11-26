@@ -1,0 +1,10 @@
+dtype,mode,hidden,layers,heads,kv_heads,batch,seq_len,graph_nodes,samples,p50_wall_us,p95_wall_us,p50_device_us,p95_device_us,max_abs_err,max_rel_err
+f32,eager,512,4,8,2,1,129,52,5,545.560000,603.157000,540.383995,588.447988,3.81469727e-06,0.000138086213
+f32,graph,512,4,8,2,1,129,52,5,535.718000,557.101000,530.496001,552.767992,3.81469727e-06,0.000138086213
+Capture range started in the application.
+Capture range ended in the application.
+Generating '/tmp/nano-round2/benchmarks/operators/round2-results/nsys/tmp/nsys-wty/nsys-report-1939.qdstrm'
+[1/1] [0%                          ] decode-graph.nsys-repProcessing events...
+[1/1] [0%                          ] decode-graph.nsys-rep[1/1] [1%                          ] decode-graph.nsys-rep[1/1] [2%                          ] decode-graph.nsys-rep[1/1] [5%                          ] decode-graph.nsys-rep[1/1] [==19%                       ] decode-graph.nsys-rep[1/1] [==20%                       ] decode-graph.nsys-rep[1/1] [=========45%                ] decode-graph.nsys-rep[1/1] [============55%             ] decode-graph.nsys-rep[1/1] [=======================96%  ] decode-graph.nsys-rep[1/1] [========================98% ] decode-graph.nsys-rep[1/1] [========================100%] decode-graph.nsys-rep[1/1] [========================100%] decode-graph.nsys-rep
+Generated:
+	/tmp/nano-round2/benchmarks/operators/round2-results/nsys/decode-graph.nsys-rep

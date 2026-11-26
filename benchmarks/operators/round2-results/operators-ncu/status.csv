@@ -1,0 +1,7 @@
+operator,dtype,status,exit_code,reason,report,csv
+gemv,f32,captured,0,,gemv-f32.ncu-repz,gemv-f32.csv
+gemv,f16,captured,0,,gemv-f16.ncu-repz,gemv-f16.csv
+gemv,bf16,captured,0,,gemv-bf16.ncu-repz,gemv-bf16.csv
+rms,f32,captured,0,,rms-f32.ncu-repz,rms-f32.csv
+rms,f16,captured,0,,rms-f16.ncu-repz,rms-f16.csv
+rms,bf16,captured,0,,rms-bf16.ncu-repz,rms-bf16.csv

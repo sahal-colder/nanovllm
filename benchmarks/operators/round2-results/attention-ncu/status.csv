@@ -1,0 +1,4 @@
+dtype,status,reason,exit_code,report,csv
+f32,captured,,0,attention-f32.ncu-repz,attention-f32.csv
+f16,captured,,0,attention-f16.ncu-repz,attention-f16.csv
+bf16,captured,,0,attention-bf16.ncu-repz,attention-bf16.csv

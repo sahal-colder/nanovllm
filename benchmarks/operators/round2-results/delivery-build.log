@@ -1,0 +1,39 @@
+[ 10%] Building C object CMakeFiles/nano_model.dir/src/cache.c.o
+[ 10%] Building C object CMakeFiles/nano_model.dir/src/tokenizer.c.o
+[ 10%] Building C object CMakeFiles/nano_model.dir/src/model.c.o
+[ 13%] Building CUDA object CMakeFiles/nano_operators.dir/src/operators/sgemv.cu.o
+[ 17%] Building C object CMakeFiles/nano_model.dir/src/sampler.c.o
+[ 20%] Building CUDA object CMakeFiles/nano_operators.dir/src/operators/rmsnorm.cu.o
+[ 24%] Building CUDA object CMakeFiles/nano_operators.dir/src/operators/attention.cu.o
+[ 27%] Linking C static library libnano_model.a
+[ 27%] Built target nano_model
+[ 31%] Building CUDA object CMakeFiles/nano_operators.dir/src/operators/decode_ops.cu.o
+[ 34%] Building C object CMakeFiles/nano_cpu.dir/src/engine.c.o
+[ 37%] Linking C static library libnano_cpu.a
+[ 37%] Built target nano_cpu
+[ 41%] Building C object CMakeFiles/nanovllm.dir/src/main.c.o
+[ 44%] Linking C executable nanovllm
+[ 44%] Built target nanovllm
+[ 48%] Building C object CMakeFiles/test_engine.dir/tests/test_engine.c.o
+[ 51%] Linking C executable test_engine
+[ 51%] Built target test_engine
+[ 55%] Building C object CMakeFiles/test_tokenizer.dir/tests/test_tokenizer.c.o
+[ 58%] Linking C executable test_tokenizer
+[ 58%] Built target test_tokenizer
+[ 62%] Linking CUDA static library libnano_operators.a
+[ 62%] Built target nano_operators
+[ 72%] Building C object CMakeFiles/nano_cuda.dir/src/cuda_runtime.c.o
+[ 72%] Building C object CMakeFiles/nano_cuda.dir/src/engine.c.o
+[ 65%] Building C object CMakeFiles/bench_operators.dir/benchmarks/operators/bench_operators.c.o
+[ 75%] Linking CUDA static library libnano_cuda.a
+[ 75%] Built target nano_cuda
+[ 79%] Building C object CMakeFiles/nanovllm_cuda.dir/src/main.c.o
+[ 86%] Building C object CMakeFiles/bench_decode.dir/benchmarks/round2/attention_bench.c.o
+[ 86%] Building C object CMakeFiles/bench_decode.dir/benchmarks/round2/main.c.o
+[ 89%] Building C object CMakeFiles/bench_decode.dir/benchmarks/round2/decode_bench.c.o
+[ 93%] Linking C executable nanovllm_cuda
+[ 93%] Built target nanovllm_cuda
+[ 96%] Linking C executable bench_operators
+[ 96%] Built target bench_operators
+[100%] Linking C executable bench_decode
+[100%] Built target bench_decode

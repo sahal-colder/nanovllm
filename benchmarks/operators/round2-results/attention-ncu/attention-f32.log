@@ -1,0 +1,8 @@
+$ /usr/local/cuda/bin/ncu --metrics dram__throughput.avg.pct_of_peak_sustained_elapsed,dram__bytes.sum.per_second,sm__warps_active.avg.pct_of_peak_sustained_active --kernel-name regex:nv_attention_(partition|merge)_kernel --launch-count 2 --clock-control none --cache-control all --export /tmp/nano-round2/benchmarks/operators/round2-results/attention-ncu/attention-f32 /tmp/nano-r2-build/bench_decode --profile-attention f32
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 220744 (/tmp/nano-r2-build/bench_decode)
+==PROF== Profiling "nv_attention_partition_kernel": 0%....50%....100% - 1 pass
+==PROF== Profiling "nv_attention_merge_kernel": 0%....50%....100% - 1 pass
+PROFILE validated f32 split-online, abs=1.11758709e-08 rel=2.04285271
+==PROF== Disconnected from process 220744
+==PROF== Report: /tmp/nano-round2/benchmarks/operators/round2-results/attention-ncu/attention-f32.ncu-repz

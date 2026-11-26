@@ -1,0 +1,26 @@
+{
+  "model": "TinyStories 260K",
+  "dtype": "f32",
+  "prompts": [
+    "Once upon a time",
+    "A little girl",
+    "The cat",
+    "One day there was a boy"
+  ],
+  "generated_tokens_per_prompt": 32,
+  "total_generated_tokens": 128,
+  "cpu_eager_graph_exact_token_identity": true,
+  "sha256": {
+    "stories260K.bin": "b0a507e7ad0f626624f17112325e66691f9076d622e1d3274d103d00299f2696",
+    "tok512.bin": "037cb335abb25d1fa9e8ecae30ed2a3a8ace9302862ebcdc05d51a6bbb10c312"
+  },
+  "config": [
+    64,
+    172,
+    5,
+    8,
+    4,
+    512,
+    512
+  ]
+}

@@ -30,7 +30,10 @@ static void usage(FILE *file) {
         "  --no-cache    disable prefix reuse\n"
         "  --trace       print scheduling progress on stderr\n"
         "  --ids         print generated token IDs instead of text\n"
-        "  --ignore-eos  generate exactly N tokens\n");
+        "  --ignore-eos  generate exactly N tokens\n"
+        "  --cuda        use the optional CUDA execution build\n"
+        "  --cuda-graph  use CUDA Graph execution\n"
+        "  --dtype D     CUDA storage dtype: f32/f16/bf16\n");
 }
 
 /* 数量和种子选项只接受 int 范围内的正整数。
@@ -82,6 +85,7 @@ int main(int argc, char **argv) {
      */
     const char **prompts = nv_alloc((size_t)argc, sizeof(char *));
     int count = 0, max_new = 64, trace = 0, ids = 0;
+    int cuda=0,cuda_graph=0,cuda_dtype=0;
 
     /* 字段依次为：物理 KV 块数、每块 token 数、活跃请求上限、每步 forward 预算、前缀复用。 */
     NvOptions options = {128, 16, 4, 32, 1};
@@ -104,12 +108,15 @@ int main(int argc, char **argv) {
         if (strcmp(flag, "--trace") == 0) { trace = 1; continue; }
         if (strcmp(flag, "--ids") == 0) { ids = 1; continue; }
         if (strcmp(flag, "--ignore-eos") == 0) { sampling.ignore_eos = 1; continue; }
+        if (strcmp(flag,"--cuda")==0){cuda=1;continue;}
+        if (strcmp(flag,"--cuda-graph")==0){cuda=1;cuda_graph=1;continue;}
 
         /* 其余选项都需要一个值。argv[++i] 先把 i 加 1，再取该位置的字符串，
          * 所以这里会消费紧跟在选项后面的值；循环末尾的 i++ 随后移到下个选项。
          */
         if (i + 1 >= argc) nv_fatal("option needs a value; see --help");
         const char *value = argv[++i];
+        if(strcmp(flag,"--dtype")==0){cuda_dtype=!strcmp(value,"f32")?0:!strcmp(value,"f16")?1:!strcmp(value,"bf16")?2:-1;if(cuda_dtype<0)nv_fatal("dtype must be f32/f16/bf16");continue;}
         if (strcmp(flag, "-z") == 0) { tokenizer_path = value; continue; }
 
         /* count++ 是“先使用旧值、再加一”：先写 prompts[count]，再让请求数加一。
@@ -132,6 +139,7 @@ int main(int argc, char **argv) {
      */
     if (sampling.temperature < 0 || sampling.top_p <= 0 || sampling.top_p > 1)
         nv_fatal("temperature must be >=0, top-p must be in (0,1]");
+    if(!cuda&&cuda_dtype)nv_fatal("--dtype requires --cuda or --cuda-graph");
 
     /* !count 是“count 等于 0”的简写。用户没写 -i 时，把默认提示词放到第一个槽位并令 count 为 1。 */
     if (!count) prompts[count++] = "Once upon a time";
@@ -146,6 +154,8 @@ int main(int argc, char **argv) {
     nv_tokenizer_load(&tokenizer, tokenizer_path, model.config.vocab_size);
     NvEngine engine;
     nv_engine_init(&engine, &model, options);
+    if(cuda&&!nv_engine_use_cuda(&engine,cuda_dtype,cuda_graph))nv_fatal("CUDA build required; configure NANO_WITH_CUDA=ON");
+    fprintf(stderr,"execution=%s dtype=%d (scheduler batches remain serial per request)\n",cuda?(cuda_graph?"cuda_graph":"cuda_eager"):"cpu",cuda_dtype);
     /* 所有请求先进入等待队列，真正的 prefill/decode 在后面的 step 循环中执行。
      * &engine 把引擎地址传给函数；tokens 是本次临时编码结果，nv_engine_add 会复制它。
      */
@@ -173,9 +183,9 @@ int main(int argc, char **argv) {
      * 这里只计算 K/V 数组，不包含块元数据、模型权重或临时计算缓冲区。
      */
     size_t kv_bytes = (size_t)options.num_blocks * (size_t)options.block_size *
-                      (size_t)model.config.n_layers * (size_t)engine.cache.kv_dim * 2 * sizeof(float);
-    fprintf(stderr, "KV pool: %.2f MiB; requests=%d (CPU serial forwards within scheduling batches)\n",
-            (double)kv_bytes / 1048576.0, count);
+                      (size_t)model.config.n_layers * (size_t)engine.cache.kv_dim * 2 * (cuda&&cuda_dtype?2:4);
+    fprintf(stderr, "KV pool: %.2f MiB; requests=%d (%s serial forwards within scheduling batches)\n",
+            (double)kv_bytes / 1048576.0, count,cuda?"CUDA":"CPU");
 
     /* engine.requests[0] 取出第一个请求指针；-> 用来访问“结构体指针”指向的成员，
      * 等价于 (*engine.requests[0]).prompt_len。printed 是下一枚待打印 token 的下标，

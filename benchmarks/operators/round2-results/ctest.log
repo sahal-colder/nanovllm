@@ -1,0 +1,22 @@
+Internal ctest changing into directory: /tmp/nano-r2-build
+Test project /tmp/nano-r2-build
+    Start 1: fixtures
+1/8 Test #1: fixtures .........................   Passed    0.04 sec
+    Start 2: engine_cpu
+2/8 Test #2: engine_cpu .......................   Passed    0.01 sec
+    Start 3: tokenizer
+3/8 Test #3: tokenizer ........................   Passed    0.00 sec
+    Start 4: cli
+4/8 Test #4: cli ..............................   Passed    0.04 sec
+    Start 5: gemv_rms
+5/8 Test #5: gemv_rms .........................   Passed    1.21 sec
+    Start 6: attention
+6/8 Test #6: attention ........................   Passed    2.33 sec
+    Start 7: cuda_fixtures
+7/8 Test #7: cuda_fixtures ....................   Passed    1.61 sec
+    Start 8: decode
+8/8 Test #8: decode ...........................   Passed    0.53 sec
+
+100% tests passed, 0 tests failed out of 8
+
+Total Test time (real) =   5.76 sec

@@ -1,0 +1,42 @@
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /tmp/nano-r2-build
+Consolidate compiler generated dependencies of target nano_model
+Consolidate compiler generated dependencies of target nano_operators
+[ 17%] Built target nano_model
+[ 24%] Building CUDA object CMakeFiles/nano_operators.dir/src/operators/attention.cu.o
+[ 24%] Building CUDA object CMakeFiles/nano_operators.dir/src/operators/decode_ops.cu.o
+Consolidate compiler generated dependencies of target nano_cpu
+[ 27%] Building C object CMakeFiles/nano_cpu.dir/src/engine.c.o
+[ 31%] Linking C static library libnano_cpu.a
+[ 31%] Built target nano_cpu
+Consolidate compiler generated dependencies of target nanovllm
+Consolidate compiler generated dependencies of target test_engine
+[ 34%] Building C object CMakeFiles/nanovllm.dir/src/main.c.o
+[ 37%] Linking C executable test_engine
+[ 41%] Built target test_engine
+Consolidate compiler generated dependencies of target test_tokenizer
+[ 44%] Linking C executable test_tokenizer
+[ 51%] Linking C executable nanovllm
+[ 51%] Built target test_tokenizer
+[ 51%] Built target nanovllm
+[ 55%] Linking CUDA static library libnano_operators.a
+[ 62%] Built target nano_operators
+Consolidate compiler generated dependencies of target bench_operators
+Consolidate compiler generated dependencies of target nano_cuda
+[ 65%] Linking C executable bench_operators
+[ 68%] Building C object CMakeFiles/nano_cuda.dir/src/cuda_runtime.c.o
+[ 72%] Building C object CMakeFiles/nano_cuda.dir/src/engine.c.o
+[ 75%] Built target bench_operators
+[ 79%] Linking CUDA static library libnano_cuda.a
+[ 79%] Built target nano_cuda
+Consolidate compiler generated dependencies of target bench_decode
+Consolidate compiler generated dependencies of target nanovllm_cuda
+[ 82%] Building C object CMakeFiles/bench_decode.dir/benchmarks/round2/attention_bench.c.o
+[ 93%] Building C object CMakeFiles/bench_decode.dir/benchmarks/round2/decode_bench.c.o
+[ 93%] Building C object CMakeFiles/nanovllm_cuda.dir/src/main.c.o
+[ 93%] Building C object CMakeFiles/bench_decode.dir/benchmarks/round2/main.c.o
+[ 96%] Linking C executable nanovllm_cuda
+[ 96%] Built target nanovllm_cuda
+[100%] Linking C executable bench_decode
+[100%] Built target bench_decode

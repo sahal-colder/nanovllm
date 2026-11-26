@@ -1,0 +1,346 @@
+{
+  "attention_rows": 144,
+  "attention_cases": 72,
+  "attention_example": [
+    {
+      "dtype": "f32",
+      "batch": "1",
+      "heads": "16",
+      "kv_heads": "4",
+      "head_dim": "128",
+      "seq_len": "4096",
+      "implementation": "serial_online",
+      "p50_us": "1596.415997",
+      "p95_us": "1597.440004",
+      "ideal_bytes": "16793600",
+      "effective_GiB_s": "9.797107",
+      "max_abs_err": "8.38190317e-08",
+      "max_rel_err": "0.0342577794",
+      "samples": "300"
+    },
+    {
+      "dtype": "f32",
+      "batch": "1",
+      "heads": "16",
+      "kv_heads": "4",
+      "head_dim": "128",
+      "seq_len": "4096",
+      "implementation": "split_online_vec4",
+      "p50_us": "73.728003",
+      "p95_us": "73.728003",
+      "ideal_bytes": "16793600",
+      "effective_GiB_s": "212.134579",
+      "max_abs_err": "1.02445483e-08",
+      "max_rel_err": "0.00776793378",
+      "samples": "300"
+    }
+  ],
+  "decode": [
+    {
+      "dtype": "f32",
+      "eager": {
+        "dtype": "f32",
+        "mode": "eager",
+        "hidden": "512",
+        "layers": "4",
+        "heads": "8",
+        "kv_heads": "2",
+        "batch": "1",
+        "seq_len": "129",
+        "graph_nodes": "52",
+        "samples": "100",
+        "p50_wall_us": "482.953000",
+        "p95_wall_us": "484.934000",
+        "p50_device_us": "478.208005",
+        "p95_device_us": "480.255991",
+        "max_abs_err": "3.81469727e-06",
+        "max_rel_err": "0.000138086213"
+      },
+      "graph": {
+        "dtype": "f32",
+        "mode": "graph",
+        "hidden": "512",
+        "layers": "4",
+        "heads": "8",
+        "kv_heads": "2",
+        "batch": "1",
+        "seq_len": "129",
+        "graph_nodes": "52",
+        "samples": "100",
+        "p50_wall_us": "454.499000",
+        "p95_wall_us": "458.279000",
+        "p50_device_us": "449.535996",
+        "p95_device_us": "453.471988",
+        "max_abs_err": "3.81469727e-06",
+        "max_rel_err": "0.000138086213"
+      },
+      "speedup": 1.0626051982512612,
+      "reduction_percent": 5.891670618051847
+    },
+    {
+      "dtype": "f16",
+      "eager": {
+        "dtype": "f16",
+        "mode": "eager",
+        "hidden": "512",
+        "layers": "4",
+        "heads": "8",
+        "kv_heads": "2",
+        "batch": "1",
+        "seq_len": "129",
+        "graph_nodes": "52",
+        "samples": "100",
+        "p50_wall_us": "250.343000",
+        "p95_wall_us": "251.408000",
+        "p50_device_us": "245.887995",
+        "p95_device_us": "246.784002",
+        "max_abs_err": "0.001953125",
+        "max_rel_err": "0.0426608821"
+      },
+      "graph": {
+        "dtype": "f16",
+        "mode": "graph",
+        "hidden": "512",
+        "layers": "4",
+        "heads": "8",
+        "kv_heads": "2",
+        "batch": "1",
+        "seq_len": "129",
+        "graph_nodes": "52",
+        "samples": "100",
+        "p50_wall_us": "221.740000",
+        "p95_wall_us": "223.492000",
+        "p50_device_us": "217.823997",
+        "p95_device_us": "218.112007",
+        "max_abs_err": "0.001953125",
+        "max_rel_err": "0.0426608821"
+      },
+      "speedup": 1.128993415712095,
+      "reduction_percent": 11.4255241808239
+    },
+    {
+      "dtype": "bf16",
+      "eager": {
+        "dtype": "bf16",
+        "mode": "eager",
+        "hidden": "512",
+        "layers": "4",
+        "heads": "8",
+        "kv_heads": "2",
+        "batch": "1",
+        "seq_len": "129",
+        "graph_nodes": "52",
+        "samples": "100",
+        "p50_wall_us": "249.355000",
+        "p95_wall_us": "249.992000",
+        "p50_device_us": "244.864002",
+        "p95_device_us": "245.759994",
+        "max_abs_err": "0",
+        "max_rel_err": "0"
+      },
+      "graph": {
+        "dtype": "bf16",
+        "mode": "graph",
+        "hidden": "512",
+        "layers": "4",
+        "heads": "8",
+        "kv_heads": "2",
+        "batch": "1",
+        "seq_len": "129",
+        "graph_nodes": "52",
+        "samples": "100",
+        "p50_wall_us": "221.493000",
+        "p95_wall_us": "222.386000",
+        "p50_device_us": "217.087999",
+        "p95_device_us": "218.112007",
+        "max_abs_err": "0",
+        "max_rel_err": "0"
+      },
+      "speedup": 1.125791785744922,
+      "reduction_percent": 11.173627960137155
+    }
+  ],
+  "ncu": [
+    {
+      "operator": "sgemv",
+      "dtype": "f32",
+      "dram_pct": 96.589464,
+      "dram_GiB_s": 230.05859553813934,
+      "achieved_occupancy_pct": 98.485807,
+      "kernel": "void mi_gemv_vec4_kernel<float>(const T1 *, const T1 *, T1 *, int, int, int, int, int)",
+      "raw_csv": "benchmarks/operators/round2-results/operators-ncu/gemv-f32.csv",
+      "report": "benchmarks/operators/round2-results/operators-ncu/gemv-f32.ncu-repz"
+    },
+    {
+      "operator": "sgemv",
+      "dtype": "f16",
+      "dram_pct": 90.514412,
+      "dram_GiB_s": 215.59222415089607,
+      "achieved_occupancy_pct": 97.648355,
+      "kernel": "void mi_gemv_vec4_kernel<__half>(const T1 *, const T1 *, T1 *, int, int, int, int, int)",
+      "raw_csv": "benchmarks/operators/round2-results/operators-ncu/gemv-f16.csv",
+      "report": "benchmarks/operators/round2-results/operators-ncu/gemv-f16.ncu-repz"
+    },
+    {
+      "operator": "sgemv",
+      "dtype": "bf16",
+      "dram_pct": 90.497369,
+      "dram_GiB_s": 215.50470497459173,
+      "achieved_occupancy_pct": 96.70385,
+      "kernel": "void mi_gemv_vec4_kernel<__nv_bfloat16>(const T1 *, const T1 *, T1 *, int, int, int, int, int)",
+      "raw_csv": "benchmarks/operators/round2-results/operators-ncu/gemv-bf16.csv",
+      "report": "benchmarks/operators/round2-results/operators-ncu/gemv-bf16.ncu-repz"
+    },
+    {
+      "operator": "rmsnorm",
+      "dtype": "f32",
+      "dram_pct": 65.723643,
+      "dram_GiB_s": 136.3783748820424,
+      "achieved_occupancy_pct": 85.857198,
+      "kernel": "void mi_rms_vec4_kernel<float, 4>(const T1 *, const T1 *, T1 *, int, int, int, float)",
+      "raw_csv": "benchmarks/operators/round2-results/operators-ncu/rms-f32.csv",
+      "report": "benchmarks/operators/round2-results/operators-ncu/rms-f32.ncu-repz"
+    },
+    {
+      "operator": "rmsnorm",
+      "dtype": "f16",
+      "dram_pct": 51.550245,
+      "dram_GiB_s": 106.96541704237461,
+      "achieved_occupancy_pct": 86.440525,
+      "kernel": "void mi_rms_vec4_kernel<__half, 4>(const T1 *, const T1 *, T1 *, int, int, int, float)",
+      "raw_csv": "benchmarks/operators/round2-results/operators-ncu/rms-f16.csv",
+      "report": "benchmarks/operators/round2-results/operators-ncu/rms-f16.ncu-repz"
+    },
+    {
+      "operator": "rmsnorm",
+      "dtype": "bf16",
+      "dram_pct": 51.945405,
+      "dram_GiB_s": 107.6749712228775,
+      "achieved_occupancy_pct": 87.301457,
+      "kernel": "void mi_rms_vec4_kernel<__nv_bfloat16, 4>(const T1 *, const T1 *, T1 *, int, int, int, float)",
+      "raw_csv": "benchmarks/operators/round2-results/operators-ncu/rms-bf16.csv",
+      "report": "benchmarks/operators/round2-results/operators-ncu/rms-bf16.ncu-repz"
+    },
+    {
+      "operator": "attention_partition",
+      "dtype": "f32",
+      "dram_pct": 62.60156,
+      "dram_GiB_s": 130.42787741869688,
+      "achieved_occupancy_pct": 75.858809,
+      "kernel": "void nv_attention_partition_kernel<float, 1, 1, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",
+      "raw_csv": "benchmarks/operators/round2-results/attention-ncu/attention-f32.csv",
+      "report": "benchmarks/operators/round2-results/attention-ncu/attention-f32.ncu-repz"
+    },
+    {
+      "operator": "attention_merge",
+      "dtype": "f32",
+      "dram_pct": 38.627486,
+      "dram_GiB_s": 80.24127781391144,
+      "achieved_occupancy_pct": 11.155655,
+      "kernel": "void nv_attention_merge_kernel<float>(T1 *, const float *, NvAttention, int)",
+      "raw_csv": "benchmarks/operators/round2-results/attention-ncu/attention-f32.csv",
+      "report": "benchmarks/operators/round2-results/attention-ncu/attention-f32.ncu-repz"
+    },
+    {
+      "operator": "attention_partition",
+      "dtype": "f16",
+      "dram_pct": 35.324428,
+      "dram_GiB_s": 73.59127420932055,
+      "achieved_occupancy_pct": 68.723861,
+      "kernel": "void nv_attention_partition_kernel<__half, 1, 1, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",
+      "raw_csv": "benchmarks/operators/round2-results/attention-ncu/attention-f16.csv",
+      "report": "benchmarks/operators/round2-results/attention-ncu/attention-f16.ncu-repz"
+    },
+    {
+      "operator": "attention_merge",
+      "dtype": "f16",
+      "dram_pct": 39.848319,
+      "dram_GiB_s": 82.46695902198553,
+      "achieved_occupancy_pct": 11.071585,
+      "kernel": "void nv_attention_merge_kernel<__half>(T1 *, const float *, NvAttention, int)",
+      "raw_csv": "benchmarks/operators/round2-results/attention-ncu/attention-f16.csv",
+      "report": "benchmarks/operators/round2-results/attention-ncu/attention-f16.ncu-repz"
+    },
+    {
+      "operator": "attention_partition",
+      "dtype": "bf16",
+      "dram_pct": 35.519861,
+      "dram_GiB_s": 74.03620332479477,
+      "achieved_occupancy_pct": 70.792484,
+      "kernel": "void nv_attention_partition_kernel<__nv_bfloat16, 1, 1, 1>(const T1 *, T1 *, NvAttention, float *, int, int)",
+      "raw_csv": "benchmarks/operators/round2-results/attention-ncu/attention-bf16.csv",
+      "report": "benchmarks/operators/round2-results/attention-ncu/attention-bf16.ncu-repz"
+    },
+    {
+      "operator": "attention_merge",
+      "dtype": "bf16",
+      "dram_pct": 41.202652,
+      "dram_GiB_s": 85.30914783477783,
+      "achieved_occupancy_pct": 11.080277,
+      "kernel": "void nv_attention_merge_kernel<__nv_bfloat16>(T1 *, const float *, NvAttention, int)",
+      "raw_csv": "benchmarks/operators/round2-results/attention-ncu/attention-bf16.csv",
+      "report": "benchmarks/operators/round2-results/attention-ncu/attention-bf16.ncu-repz"
+    }
+  ],
+  "nsys": {
+    "eager": {
+      "kernel_launch_api_calls": 255,
+      "graph_launch_api_calls": 0,
+      "gpu_kernels": 255,
+      "device_memsets": 5,
+      "distinct_graph_nodes": 0,
+      "launch_api_total_us": 501.104,
+      "gpu_activity_window_us": 2761.165,
+      "gpu_active_us": 2509.807,
+      "gpu_gap_us": 251.358,
+      "gpu_gap_percent": 9.103331383673195,
+      "nvtx_range_wall_us": 2791.114
+    },
+    "graph": {
+      "kernel_launch_api_calls": 0,
+      "graph_launch_api_calls": 5,
+      "gpu_kernels": 255,
+      "device_memsets": 5,
+      "distinct_graph_nodes": 51,
+      "launch_api_total_us": 169.652,
+      "gpu_activity_window_us": 2683.33,
+      "gpu_active_us": 2482.089,
+      "gpu_gap_us": 201.241,
+      "gpu_gap_percent": 7.499673912638401,
+      "nvtx_range_wall_us": 2700.415
+    },
+    "steps_per_mode": 5,
+    "host_launches_per_step": {
+      "eager": 51,
+      "graph": 1
+    },
+    "scope": "Five instrumented steps/mode; kernel+device-memset activity union; gaps include event/synchronization and tracing overhead. Use unprofiled 100-sample CSV for latency."
+  },
+  "pretrained": {
+    "model": "TinyStories 260K",
+    "dtype": "f32",
+    "prompts": [
+      "Once upon a time",
+      "A little girl",
+      "The cat",
+      "One day there was a boy"
+    ],
+    "generated_tokens_per_prompt": 32,
+    "total_generated_tokens": 128,
+    "cpu_eager_graph_exact_token_identity": true,
+    "sha256": {
+      "stories260K.bin": "b0a507e7ad0f626624f17112325e66691f9076d622e1d3274d103d00299f2696",
+      "tok512.bin": "037cb335abb25d1fa9e8ecae30ed2a3a8ace9302862ebcdc05d51a6bbb10c312"
+    },
+    "config": [
+      64,
+      172,
+      5,
+      8,
+      4,
+      512,
+      512
+    ]
+  },
+  "validation_log": "PASS attention cases=90 + invalid-metadata guards, seed=0x82a6371\nattention f32 comparisons=49152 max_abs_err=1.04308128e-07 max_rel_err=0.00788308019\nattention f16 comparisons=49152 max_abs_err=6.10351562e-05 max_rel_err=0.00787401575\nattention bf16 comparisons=49152 max_abs_err=3.05175781e-05 max_rel_err=0.0698529412\nPASS decode layers=1 batch=1 dtype=f32 page=16 steps=21 logits=5523 abs=4.76837158e-07 rel=0.000399800872 KV=2048 KV_abs=6.51925802e-08 KV_rel=4.48396626e-05 graph_identity_unchanged=1 no_allocation_or_host_nodes=1\nPASS decode layers=3 batch=2 dtype=f32 page=3 steps=83 logits=43658 abs=9.53674316e-07 rel=0.012787573 KV=123264 KV_abs=3.94880772e-07 KV_rel=0.00306211033 graph_identity_unchanged=1 no_allocation_or_host_nodes=1\nPASS decode layers=1 batch=1 dtype=f16 page=16 steps=21 logits=5523 abs=0.000122070312 rel=0.000804505229 KV=2048 KV_abs=5.96046448e-08 KV_rel=0.000811688312 graph_identity_unchanged=1 no_allocation_or_host_nodes=1\nPASS decode layers=3 batch=2 dtype=f16 page=3 steps=83 logits=43658 abs=0.00390625 rel=0.494714588 KV=123264 KV_abs=0.000244140625 KV_rel=0.0588235294 graph_identity_unchanged=1 no_allocation_or_host_nodes=1\nPASS decode layers=1 batch=1 dtype=bf16 page=16 steps=21 logits=5523 abs=0.0078125 rel=0.00408163265 KV=2048 KV_abs=0 KV_rel=0 graph_identity_unchanged=1 no_allocation_or_host_nodes=1\nPASS decode layers=3 batch=2 dtype=bf16 page=3 steps=83 logits=43658 abs=0.0078125 rel=0.0363636364 KV=123264 KV_abs=0 KV_rel=0 graph_identity_unchanged=1 no_allocation_or_host_nodes=1\nPASS existing scheduler GPU/CPU token identity graph=0 tight=0 generated=24 preemptions=0 hits=0\nPASS existing scheduler GPU/CPU token identity graph=0 tight=1 generated=24 preemptions=7 hits=56\nPASS existing scheduler GPU/CPU token identity graph=1 tight=0 generated=24 preemptions=0 hits=0\nPASS existing scheduler GPU/CPU token identity graph=1 tight=1 generated=24 preemptions=7 hits=56\n"
+}

@@ -1,0 +1,52 @@
+{
+  "pages": 1,
+  "paper_mm": [
+    210.00999999999996,
+    297.00000000000017
+  ],
+  "body_pt": 11,
+  "line_spacing": 1.34,
+  "margins_cm": {
+    "vertical": 1.25,
+    "horizontal": 1.45
+  },
+  "ink_vertical_coverage": 0.8834847675040085,
+  "full_markdown_text_match": true,
+  "embedded_fonts": "NotoSansCJKsc-Bold, NotoSansCJKsc-Regular",
+  "arrow_count": 5,
+  "interview_content_absent": true,
+  "source_sha256": "83557c1c3b99ed9d25f188faf9d1f3b3c34db65a9614414431dbce7366600c3f",
+  "pdf_sha256": "de78940e92190d3ce34d0617dbd163353c2a28b5f43425ce181075c63d819c37",
+  "source": "/home/wty/Infra/docs/resume_ai_infra.md",
+  "trials": [
+    {
+      "body_pt": 11,
+      "line_spacing": 1.28,
+      "pages": 1,
+      "coverage": 0.8567610903260289
+    },
+    {
+      "body_pt": 11,
+      "line_spacing": 1.3,
+      "pages": 1,
+      "coverage": 0.8647781934794228
+    },
+    {
+      "body_pt": 11,
+      "line_spacing": 1.32,
+      "pages": 1,
+      "coverage": 0.8733297701763763
+    },
+    {
+      "body_pt": 11,
+      "line_spacing": 1.34,
+      "pages": 1,
+      "coverage": 0.8834847675040085
+    }
+  ],
+  "docx_sha256": "890b045c47d4101c3e081eac0657e5146d45a5c16eb83502b5b1e14f89c5d4a5",
+  "canonical_render_pages": 1,
+  "canonical_render_pixels_match": true,
+  "visual_qa": "Manually inspected canonical DOCX render: no clipping, misplaced lines, missing glyphs or arrows.",
+  "validated_at": "2026-11-26T10:49:19.321608+08:00"
+}

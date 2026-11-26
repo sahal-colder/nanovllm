@@ -1,0 +1,20 @@
+Internal ctest changing into directory: /tmp/miniinfer-operators-build
+Test project /tmp/miniinfer-operators-build
+    Start 1: pool
+1/7 Test #1: pool .............................   Passed    0.00 sec
+    Start 2: graph
+2/7 Test #2: graph ............................   Passed    0.00 sec
+    Start 3: tiered
+3/7 Test #3: tiered ...........................   Passed    0.00 sec
+    Start 4: kv_cache
+4/7 Test #4: kv_cache .........................   Passed    0.00 sec
+    Start 5: paged_kv
+5/7 Test #5: paged_kv .........................   Passed    0.00 sec
+    Start 6: gpu_mock
+6/7 Test #6: gpu_mock .........................   Passed    0.00 sec
+    Start 7: operators
+7/7 Test #7: operators ........................   Passed    3.19 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =   3.20 sec

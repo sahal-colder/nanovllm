@@ -1,0 +1,14 @@
+PASS attention cases=90 + invalid-metadata guards, seed=0x82a6371
+attention f32 comparisons=49152 max_abs_err=1.04308128e-07 max_rel_err=0.00788308019
+attention f16 comparisons=49152 max_abs_err=6.10351562e-05 max_rel_err=0.00787401575
+attention bf16 comparisons=49152 max_abs_err=3.05175781e-05 max_rel_err=0.0698529412
+PASS decode layers=1 batch=1 dtype=f32 page=16 steps=21 logits=5523 abs=4.76837158e-07 rel=0.000399800872 KV=2048 KV_abs=6.51925802e-08 KV_rel=4.48396626e-05 graph_identity_unchanged=1 no_allocation_or_host_nodes=1
+PASS decode layers=3 batch=2 dtype=f32 page=3 steps=83 logits=43658 abs=9.53674316e-07 rel=0.012787573 KV=123264 KV_abs=3.94880772e-07 KV_rel=0.00306211033 graph_identity_unchanged=1 no_allocation_or_host_nodes=1
+PASS decode layers=1 batch=1 dtype=f16 page=16 steps=21 logits=5523 abs=0.000122070312 rel=0.000804505229 KV=2048 KV_abs=5.96046448e-08 KV_rel=0.000811688312 graph_identity_unchanged=1 no_allocation_or_host_nodes=1
+PASS decode layers=3 batch=2 dtype=f16 page=3 steps=83 logits=43658 abs=0.00390625 rel=0.494714588 KV=123264 KV_abs=0.000244140625 KV_rel=0.0588235294 graph_identity_unchanged=1 no_allocation_or_host_nodes=1
+PASS decode layers=1 batch=1 dtype=bf16 page=16 steps=21 logits=5523 abs=0.0078125 rel=0.00408163265 KV=2048 KV_abs=0 KV_rel=0 graph_identity_unchanged=1 no_allocation_or_host_nodes=1
+PASS decode layers=3 batch=2 dtype=bf16 page=3 steps=83 logits=43658 abs=0.0078125 rel=0.0363636364 KV=123264 KV_abs=0 KV_rel=0 graph_identity_unchanged=1 no_allocation_or_host_nodes=1
+PASS existing scheduler GPU/CPU token identity graph=0 tight=0 generated=24 preemptions=0 hits=0
+PASS existing scheduler GPU/CPU token identity graph=0 tight=1 generated=24 preemptions=7 hits=56
+PASS existing scheduler GPU/CPU token identity graph=1 tight=0 generated=24 preemptions=0 hits=0
+PASS existing scheduler GPU/CPU token identity graph=1 tight=1 generated=24 preemptions=7 hits=56

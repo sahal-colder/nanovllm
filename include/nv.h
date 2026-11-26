@@ -157,6 +157,7 @@ typedef struct {
  */
 typedef struct {
     NvModel *model;           /* 借用模型；其生命周期必须覆盖引擎使用期间。 */
+    struct NvCuda *cuda;      /* Optional explicitly owned C11 CUDA execution state. */
     NvCache cache;
     NvOptions options;
     NvSequence **requests;    /* 按加入顺序保存，已完成/取消的请求也保留到引擎销毁。 */
@@ -278,6 +279,9 @@ int nv_engine_cancel(NvEngine *engine, int id);
  * 返回本次实际 forward 的 token 数；返回 0 表示所有请求均已完成或取消。
  */
 int nv_engine_step(NvEngine *engine);
+/* Optional CUDA build: dtype 0=FP32,1=FP16,2=BF16; graph=0/1.
+ * Enable before adding requests; scheduler/cache ownership stays unchanged. */
+int nv_engine_use_cuda(NvEngine *engine, int dtype, int graph);
 
 /* 从 count>0 个 logits 中选出 token ID；temperature=0 时直接返回最大值位置。
  * 随机采样会原地将 logits 转为概率，使用 count 项 scratch 排序，并更新非零 *rng。

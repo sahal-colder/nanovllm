@@ -1,146 +1,128 @@
-# nano-vLLM-C：用 C 学习 LLM 推理引擎
+# nano-vLLM-C
 
-一个约 800 行 C11 核心代码的 **CPU 学习版 nano-vLLM**。可以加载预训练模型生成文本，同时观察请求调度、分页 KV Cache、前缀复用和缓存不足时的抢占重算。
+用 C11 与 CUDA 实现 Llama 风格推理执行。复用原有 checkpoint mmap、分词器、
+采样器、请求调度、分页块引用及前缀复用，在同一执行链路接入手写 CUDA 算子与 Graph。
+KV-Fabric 负责外部存储与数据传输；本仓库负责 GPU 常驻 KV 和推理计算。
 
-参考 [nano-vLLM](https://github.com/GeeeekExplorer/nano-vllm) 的引擎结构，改写 [llama2.c](https://github.com/karpathy/llama2.c) 的前向计算和 BPE 分词。出处、版本与 MIT 许可证见 [third_party/README.md](third_party/README.md)。这是独立的 C 教学实现，不是两个上游项目的官方移植。
+本轮完整结果：[数值与性能验收](docs/CUDA_VALIDATION.md)、
+[阶段交付总结（含双项目简历）](docs/ROUND2_ACCEPTANCE.md)。
 
-## 直接运行
-
-在 WSL/Linux 中进入本目录。编译仅依赖 C 编译器、Make 和系统数学库；下载模型与运行测试使用 Python 3 标准库，不需要 pip、PyTorch 或 GPU。
-
-```bash
-cd /mnt/c/Users/wtyjt/Desktop/nanovllm
-make
-python3 tools/download.py
-./build/nanovllm models/stories15M.bin -i "Once upon a time" -n 64 -t 0
-```
-
-也可以执行 `make demo`，完成编译、下载及运行。模型已经在本工作区下载好；下载器会用 SHA256 校验已有文件，正确时直接复用。
-
-15M 权重约 61 MB，默认分词器约 434 KB。实际运行示例开头：
+## 架构与代码入口
 
 ```text
-Once upon a time, there was a little girl named Lily. She loved to play outside in the sunshine.
+src/main.c / engine.c      C11 CLI、调度、前缀复用、抢占重算、CPU/CUDA 显式分支
+src/model.c               原 CPU 前向、legacy FP32 checkpoint mmap
+src/cache.c               原有块 ID、引用计数、空闲页 LRU 和前缀哈希链
+src/cuda_runtime.c        C11 GPU 权重/缓冲区、页指针表、Decode Step、Graph
+src/operators/            SGEMV、RMSNorm、Paged Attention、RoPE、SwiGLU 等 CUDA
+include/nv_cuda.h         Host 所有权和 Device buffer 分离的扁平 C 结构
+include/nv_attention.h    Paged Attention 的薄 C ABI 和设备数据布局
+benchmarks/round2/        独立 FP64 参考、随机测试、计时、NCU/Nsys 分析
+benchmarks/operators/     三算子原始基准和验收数据
 ```
 
-这是在 TinyStories 上训练的英文续写模型；中文输入可以分词，但模型不具备可靠的中文问答能力。
+调用链：`nv_engine_step → nv_cuda_forward → nv_cuda_step`。
 
-更小的 260K 参数 GQA 模型只需约 1.1 MB，文本质量更低，适合快速调试：
-
-```bash
-python3 tools/download.py --model 260k
-./build/nanovllm models/stories260K.bin -z models/tok512.bin -i "Once upon a time" -n 64 -t 0
+```text
+Embedding → RMSNorm → QKV SGEMV → RoPE + Paged KV Store
+          → Paged Decode Attention → O SGEMV + Residual
+          → RMSNorm → Gate/Up SGEMV → SwiGLU → Down SGEMV + Residual
+          → 重复层 → Final RMSNorm → Classifier SGEMV → CPU Sampling
 ```
 
-**模型和分词器必须配套**：15M 使用 `tokenizer.bin`（32000 词），260K 使用 `tok512.bin`（512 词）。
+Host 仍为 C11；CUDA `.cu` 只暴露 C ABI。无 class、RAII、虚函数、vtable 或 ctx
+分发层。第一轮两个算子从 MiniInfer-C 迁入，保留 `mi_*` C ABI；未复制其存储实现。
 
-## 能学到什么
+## 页布局与 Graph
 
-| 能力 | 代码位置 | 本项目的实现 |
+CPU 调度器继续使用 `block_table[logical] → physical_id` 和现有页引用/LRU。
+GPU 每个物理块独立分配，包含全部层；每层页载荷为 `[K/V, token, kv_head, dim]`，
+设备页指针表允许物理页不连续。完整前缀只读共享，当前写入页须独占。
+启用 CUDA 后释放未使用的 CPU KV 张量，保留其块管理元数据。
+
+Decode Step 只读设备 token、seq_len 和 Block Table；shape、页池和地址固定。
+所有显存分配、页表准备及 pinned 元数据上传均在捕获外；上传事件保护 staging，
+同一 stream 保证 KV 写入先于 Attention。Graph 内只有 Kernel/Memset。
+CPU 采样需要 logits 回读，发生在 Graph 外。改变 batch/模型形状/容量需重新实例化。
+
+## 三个核心算子
+
+| 算子 | 组织与复用 | 适用边界 |
 | --- | --- | --- |
-| Llama Transformer | `src/model.c` | FP32、RMSNorm、RoPE、MHA/GQA、SwiGLU、残差连接 |
-| PagedAttention 思路 | `src/cache.c`、`src/model.c` | 逻辑块映射到物理块；attention 直接读取分页后的 K/V |
-| 连续批处理 | `src/engine.c` | 每个 tick 推进多条请求，完成即释放位置，允许执行途中加入新请求 |
-| 分块 prefill | `src/engine.c` | 每个 tick 有 token 预算，长输入分多次计算 |
-| 前缀缓存 | `src/cache.c` | 逐块前缀哈希链，仅比较长度和哈希，引用计数共享，空闲块 LRU 淘汰 |
-| 抢占重算 | `src/engine.c` | 显存概念用 CPU 内存模拟；KV 不够时释放较新请求的页面，之后重放已有 token |
-| 分词与采样 | `src/tokenizer.c`、`src/sampler.c` | BPE、UTF-8 byte fallback、greedy、temperature、top-p |
+| SGEMV | 4 warps/CTA、1 warp/row，向量化 W/X，shuffle 归约 | 低 batch Decode；高 batch 用复用 W 的 GEMM 更合适 |
+| RMSNorm | 256 threads/row，输入驻留寄存器，warp/shared 归约和向量读写 | hidden 1..16384；处理非对齐、奇数尾部及平方和溢出 |
+| Paged Attention | warp/head/split，64-token 分段 Online Softmax；256-thread 合并 CTA 共享权重 | MHA/GQA/MQA、非连续页、partial tail；D≤256、容量≤65536 |
 
-这里的“批处理”是调度层的批次：同一个 tick 内各请求依次做 CPU forward，共享模型权重。没有 GPU 的批量矩阵乘法，也没有 CUDA、FlashAttention、张量并行、量化或 HTTP 服务，不以复现原版吞吐量为目标。
+FP32/FP16/BF16 均 FP32 累加；向量地址不对齐时在同一 Kernel 内安全标量访问。
+RoPE 使用原模型的邻接对形式，支持原有 legacy llama2.c FP32 checkpoint，
+加载后可转为 FP16/BF16；不直接加载 safetensors/GGUF/Qwen 权重。
 
-权重格式是 **llama2.c legacy FP32 `.bin`**：7 个 int32 头字段加 FP32 tensor。不能直接加载 GGUF、safetensors、Qwen 权重或 llama2.c 的量化/版本化格式。当前实现固定 RoPE base=10000 和 RMSNorm epsilon=1e-5，支持共享/非共享输出权重。
+## 代表性实测
 
-## 观察调度与前缀缓存
+RTX 4060 Laptop 8188 MiB，CUDA 13.4 / cuBLAS 13.8，SM 89。
+第一轮 SGEMV/RMSNorm 延迟样本保留在 `benchmarks/operators/results/`；
+本轮在 nano-vLLM 中重新采集三算子的 NCU，并完成全链路回归。
 
-`-i` 可以重复。单请求流式打印；多请求在完成后按请求 ID 打印，调度进度在 stderr。
+| 算子与形状 | 基础 P50 | 优化 P50 | 口径 |
+| --- | ---: | ---: | --- |
+| FP32 SGEMV 4096×4096 B1 | 272.38 µs | 272.38 µs | 与 cuBLAS 同级；大矩阵访存受限 |
+| FP32 RMSNorm 128×4096 | 8.19 µs | 6.14 µs | 约 1.33×；CPU 逐元素校验 |
+| FP32 Attention B1/H16/KV4/D128/S4096 | 1596.42 µs | 73.73 µs | 对照本项目串行 Warp 参考；非成熟库比较 |
 
-```bash
-./build/nanovllm models/stories15M.bin \
-  -i "Once upon a time, there was a little girl" \
-  -i "Once upon a time, there was a little boy" \
-  -n 32 -t 0 --block-size 4 --batch 2 --budget 32 --trace
+有效带宽不能冒充 DRAM 实测。上述 Attention 为 warm-cache；本轮 NCU cache flush：
+
+| FP32 Kernel | DRAM 利用率 | 实测 GiB/s | Achieved Occupancy |
+| --- | ---: | ---: | ---: |
+| SGEMV | 96.59% | 230.06 | 98.49% |
+| RMSNorm | 65.72% | 136.38 | 85.86% |
+| Attention 分段 | 62.60% | 130.43 | 75.86% |
+| Attention 合并 | 38.63% | 80.24 | 11.16% |
+
+NCU 形状分别为 8192×4096/B1、128×4096、B1/H16/KV4/D128/S4096。
+合并只有 16 个 CTA，低并行度仍是该形状的限制。
+
+4 层随机权重 Decoder（d512、FFN1536、H8/KV2、seq129、B1），100 样本计算链路时间：
+
+| dtype | eager P50/P95 µs | Graph P50/P95 µs |
+| --- | ---: | ---: |
+| FP32 | 482.95 / 484.93 | 454.50 / 458.28 |
+| FP16 | 250.34 / 251.41 | 221.74 / 223.49 |
+| BF16 | 249.36 / 249.99 | 221.49 / 222.39 |
+
+计时覆盖 Host 提交至 stream 完成，不含元数据 H2D、logits D2H、采样及 Graph 实例化。
+Nsight Systems 同配置各 5 步：GPU Kernel 均 255 个，Host 提交由 255 次 Kernel
+Launch 变为 5 次 Graph Launch，即每步 51 → 1；未声称消除全部 GPU 调度间隙。
+
+## 构建与一键复现
+
+CPU 仍可 `make && make test`。CUDA 模式需要 CMake 3.18+、CUDA Toolkit 和 Python 3。
+本机架构为 89，其他卡通过 `NV_CUDA_ARCH` 指定兼容架构。
+
+```sh
+# 全量构建、8 项 CTest、Memcheck/Racecheck、Attention 和 Decode 基准
+bash tools/validate_cuda.sh build-cuda benchmarks/operators/runs/new-run
+
+# 加上 NCU 和 Nsys：仅 NCU 在本机需要 sudo 计数器权限
+bash tools/validate_cuda.sh build-cuda benchmarks/operators/runs/profile-run --profile
 ```
 
-比较关闭缓存后的 `forwards`，检查启用时的 `reused`。前缀复用只跳过已经算好且完整的块；第二个请求太早开始、还没有完整块时，缓存命中可以为 0。
+验收数据在 `benchmarks/operators/round2-results/`。公开副本包含实测 CSV、日志、Nsys 统计及 Timeline；
+原始 NCU / Nsys 二进制报告与 SQLite 保留本地，可用 `--profile` 重新生成。
+详见[公开归档范围](benchmarks/operators/PROFILING_ARTIFACTS.md)。
+可选 `analyze_nsys.py ... --plot`
+从真实 SQLite 生成 Timeline 图（需 Matplotlib）；官方统计不依赖它。
+无 GPU 的 CUDA 测试返回 77/skip，不算 GPU 验收。
 
-```bash
-./build/nanovllm models/stories15M.bin \
-  -i "Once upon a time" -i "Once upon a time" \
-  -n 32 -t 0 --block-size 4 --blocks 10 --batch 2 --budget 8 --trace --no-cache
+## 运行预训练模型
+
+```sh
+python3 tools/download.py --model 260k
+build-cuda/nanovllm_cuda models/stories260K.bin -z models/tok512.bin \
+  -i "Once upon a time" -n 32 -t 0 --cuda-graph
+python3 benchmarks/round2/verify_pretrained.py build-cuda models benchmarks/operators/runs/pretrained
 ```
 
-上面的紧凑 KV 池可用于观察 `preemptions`。`--blocks` 至少要让单条请求独立跑完：
-
-```text
-ceil((prompt_tokens + max_new_tokens - 1) / block_size) <= num_blocks
-```
-
-`-n` 是新增 token 上限；输入和实际参与 forward 的输出必须在模型上下文内。最后一个输出不必再次 forward，因此允许 `prompt_tokens + max_new_tokens = context + 1`。采样到 BOS/EOS 就提前结束；`--ignore-eos` 用于测试固定长度输出。
-
-输出统计的 `output_tok/s` 包含 prefill 和重算耗时，不能作为独立 decode 吞吐量，也没有与上游做性能对比。所有选项见 `./build/nanovllm --help`。
-
-## 阅读顺序
-
-先读 [中文学习指南](docs/learning.md) 理解概念，再按 [学习路线](docs/study-guide.md) 分阶段动手——它给了每个阶段的阅读目标、动手实验和验收问题，以及三条按时间预算安排的路线。
-
-源码内已写好详细中文注释：文件头说明这个文件在系统里的角色，结构体字段说明语义和依赖关系，函数头说明前置条件与不变量，行内注释标出容易写错的地方。然后按以下顺序对照代码：
-
-1. `include/nv.h`：模型、序列、缓存和引擎的状态。
-2. `src/main.c` → `src/engine.c`：一个请求如何从 prompt 走到输出。
-3. `src/model.c`：一个 token 如何经过所有 Transformer 层。
-4. `src/cache.c`：K/V 如何跨序列共享和回收。
-5. `src/tokenizer.c`、`src/sampler.c`：文本和 token 的边界。
-
-[examples/api.c](examples/api.c) 展示运行中加入第二条请求。执行：
-
-```bash
-make api-demo
-```
-
-## 验证
-
-```bash
-make test
-make sanitize   # Linux + GCC/Clang 的 AddressSanitizer / UndefinedBehaviorSanitizer
-```
-
-测试无需联网；Make 会进入 `tests/` 运行测试。包含独立 dense Python 数学参考、MHA/GQA、非连续物理页面、批处理/缓存/抢占的 token 一致性、随机采样、动态加入和取消、上下文边界、EOS、分词及损坏文件检查。随机权重 fixture 用来测正确性，不用来展示语言能力。
-
-可选的真实模型上游对照：
-
-```bash
-cd tests
-python3 ../tools/compare_upstream.py \
-  --model ../models/stories15M.bin --tokenizer ../models/tokenizer.bin \
-  --binary ../build/nanovllm
-```
-
-该脚本下载固定版本的上游 `run.c` 到临时目录，编译并比较四种 prompt 的 32 个 greedy 输出 token。见 [验证记录](docs/validation.md)。
-
-可选 OpenMP 并行 CPU 矩阵乘法，使用独立构建目录避免混用编译选项：
-
-```bash
-make BUILD=build-omp OPENMP=1
-OMP_NUM_THREADS=4 ./build-omp/nanovllm models/stories15M.bin -n 64 -t 0
-```
-
-## 目录
-
-```text
-include/nv.h              C 数据结构与 API
-src/main.c                CLI、流式输出、统计
-src/engine.c              调度、请求状态、抢占重算
-src/cache.c               分页 KV、引用计数、前缀缓存
-src/model.c               权重 mmap 与 Llama 前向计算
-src/tokenizer.c           BPE 编码与解码
-src/sampler.c             greedy / temperature / top-p
-examples/api.c            执行途中加入请求的示例
-models/                   下载的权重和分词器（不纳入版本控制）
-tests/                    离线正确性测试
-tools/download.py         固定版本下载、SHA256 校验
-tools/compare_upstream.py  可选真实模型上游对照
-docs/                     中文学习说明、学习路线与验证记录
-third_party/              原始出处和许可证
-```
-
-代码采用 MIT 许可；上游改写部分保留各自 MIT 声明。下载模型适用其原始模型许可证。
+本轮真实 260K checkpoint 的 4×32 个 greedy Token 在 CPU/eager/Graph 下严格一致。
+FP16/BF16 做数值误差验收，不承诺与 FP32 的生成 Token 相同。
+CPU 调度每个 tick 仍串行推进各请求；未实现 GPU 批量 GEMM、并行 Prefill、量化或服务层。
+TinyStories 不具备可靠中文问答能力。出处与 MIT 许可证保留于 [third_party/](third_party/README.md)。

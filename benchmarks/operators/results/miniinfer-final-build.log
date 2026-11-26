@@ -1,0 +1,40 @@
+[  3%] Building CUDA object CMakeFiles/miniinfer_operators.dir/src/operators/sgemv.cu.o
+[ 13%] Building CUDA object CMakeFiles/miniinfer_operators.dir/src/operators/rmsnorm.cu.o
+[ 13%] Building C object CMakeFiles/miniinfer_storage.dir/src/common.c.o
+[ 13%] Building C object CMakeFiles/miniinfer_storage.dir/src/allocator.c.o
+[ 16%] Building C object CMakeFiles/miniinfer_storage.dir/src/graph_allocator.c.o
+[ 20%] Building C object CMakeFiles/miniinfer_storage.dir/src/storage_backend.c.o
+[ 23%] Building C object CMakeFiles/miniinfer_storage.dir/src/tiered_storage.c.o
+[ 26%] Building C object CMakeFiles/miniinfer_storage.dir/src/file_io.c.o
+[ 30%] Building C object CMakeFiles/miniinfer_storage.dir/src/kv_cache.c.o
+[ 33%] Building C object CMakeFiles/miniinfer_storage.dir/src/paged_kv.c.o
+[ 36%] Building C object CMakeFiles/miniinfer_storage.dir/src/cuda_adapter.c.o
+[ 40%] Building C object CMakeFiles/miniinfer_storage.dir/src/cuda_memory_pool.c.o
+[ 43%] Linking C static library libminiinfer_storage.a
+[ 43%] Built target miniinfer_storage
+[ 46%] Building C object CMakeFiles/miniinfer_basic.dir/examples/basic.c.o
+[ 50%] Building C object CMakeFiles/test_pool.dir/tests/test_pool.c.o
+[ 56%] Linking C executable test_pool
+[ 56%] Linking C executable miniinfer_basic
+[ 56%] Built target test_pool
+[ 56%] Built target miniinfer_basic
+[ 60%] Building C object CMakeFiles/test_graph.dir/tests/test_graph.c.o
+[ 63%] Building C object CMakeFiles/test_tiered.dir/tests/test_tiered.c.o
+[ 66%] Linking C executable test_graph
+[ 70%] Linking C executable test_tiered
+[ 70%] Built target test_graph
+[ 73%] Building C object CMakeFiles/test_kv_cache.dir/tests/test_kv_cache.c.o
+[ 73%] Built target test_tiered
+[ 76%] Building C object CMakeFiles/test_paged_kv.dir/tests/test_paged_kv.c.o
+[ 80%] Linking C executable test_kv_cache
+[ 83%] Linking C executable test_paged_kv
+[ 83%] Built target test_kv_cache
+[ 83%] Built target test_paged_kv
+[ 86%] Building C object CMakeFiles/test_gpu_mock.dir/tests/test_gpu_mock.c.o
+[ 90%] Linking C executable test_gpu_mock
+[ 90%] Built target test_gpu_mock
+[ 93%] Linking CUDA static library libminiinfer_operators.a
+[ 93%] Built target miniinfer_operators
+[ 96%] Building C object CMakeFiles/bench_operators.dir/benchmarks/operators/bench_operators.c.o
+[100%] Linking C executable bench_operators
+[100%] Built target bench_operators

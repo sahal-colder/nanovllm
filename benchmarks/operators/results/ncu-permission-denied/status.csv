@@ -1,0 +1,7 @@
+operator,dtype,status,exit_code,reason,report,csv
+gemv,f32,blocked,1,ERR_NVGPUCTRPERM,,
+gemv,f16,blocked,1,ERR_NVGPUCTRPERM,,
+gemv,bf16,blocked,1,ERR_NVGPUCTRPERM,,
+rms,f32,blocked,1,ERR_NVGPUCTRPERM,,
+rms,f16,blocked,1,ERR_NVGPUCTRPERM,,
+rms,bf16,blocked,1,ERR_NVGPUCTRPERM,,

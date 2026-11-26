@@ -7,3 +7,9 @@ __pycache__/
 # 临时草稿与演示文件，不纳入版本控制
 /temp.c
 /演示PPT.pptx
+
+# Keep raw profiler captures local; publish derived statistics and timeline.
+*.nsys-rep
+*.sqlite
+*.ncu-rep
+*.ncu-repz
