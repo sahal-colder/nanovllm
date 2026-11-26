@@ -1,10 +1,8 @@
 {
-  "validation_status": "partial",
-  "validation_completed_cases": 15,
+  "validation_status": "complete",
+  "validation_completed_cases": 16,
   "validation_total_cases": 16,
-  "validation_remaining": [
-    "envelope-large-f16-racecheck"
-  ],
+  "validation_remaining": [],
   "phase_states": {
     "performance": {
       "status": "complete",
@@ -22,17 +20,45 @@
       "updated_at": "2026-11-26T08:18:33.463498+00:00"
     },
     "validation": {
-      "status": "partial",
-      "error": "16-layer full Racecheck interrupted without completion summary; repeated heavy instrumentation correlated with desktop freeze/reboots; do not automatically retry.",
-      "completed_cases": 15,
+      "status": "complete",
+      "error": null,
+      "completed_cases": 16,
       "total_cases": 16,
-      "remaining": [
-        "envelope-large-f16-racecheck"
-      ],
-      "updated_at": "2026-11-26T08:51:05.895631+00:00"
+      "remaining": [],
+      "updated_at": "2026-11-26T12:55:08.479321+00:00",
+      "resolution": "benchmarks/audit/results-20261126-final/racecheck-resolution",
+      "scope": "Correctness only; no warmup, timing or eviction; no kernel filter; full 16-layer FP16 decoder"
     }
   },
-  "large_full_racecheck_passed": false,
+  "large_full_racecheck_passed": true,
+  "racecheck_resolution": {
+    "status": "complete",
+    "sanitizer_matrix_completed": 16,
+    "sanitizer_matrix_total": 16,
+    "scope": "Correctness only; no warmup, timing or eviction; no kernel filter; full 16-layer FP16 decoder",
+    "dynamic_positions": [
+      127,
+      128,
+      129,
+      143,
+      144
+    ],
+    "physical_KV_slots": 16777216,
+    "validation_wall_seconds": {
+      "ordinary": 16.006374669999786,
+      "memcheck": 16.077663613999903,
+      "racecheck": 46.27563074600039
+    },
+    "telemetry_snapshots": 78,
+    "min_MemAvailable_MiB": 9719.5,
+    "max_swap_MiB": 633.0,
+    "max_process_RSS_MiB": 2473.8828125,
+    "automatic_retries": 0,
+    "performance_measurements_reused": true,
+    "BF16_tolerance_failure_unchanged": true,
+    "observed_cgroup_memory_peak_MiB": 1562.16015625,
+    "observed_cgroup_swap_bytes": 0
+  },
   "environment": {
     "collected_at": "2026-11-26T16:53:11.562663+08:00",
     "gpu_post_run_snapshot": [
@@ -1943,7 +1969,8 @@
     "benchmarks/audit/results-20261126-final/attention-bf16-cold-racecheck.log",
     "benchmarks/audit/results-20261126-final/envelope-f32-racecheck.log",
     "benchmarks/audit/results-20261126-final/envelope-f16-racecheck.log",
-    "benchmarks/audit/results-20261126-final/envelope-bf16-racecheck.log"
+    "benchmarks/audit/results-20261126-final/envelope-bf16-racecheck.log",
+    "benchmarks/audit/results-20261126-final/envelope-large-f16-racecheck.log"
   ],
   "nsys": {
     "eager": {
@@ -2127,6 +2154,46 @@
       ],
       "min_temp": 44,
       "max_temp": 45
+    },
+    {
+      "file": "racecheck-resolution/telemetry.jsonl",
+      "snapshots": 78,
+      "sm_mem_MHz": [
+        [
+          "2010",
+          "7001"
+        ],
+        [
+          "2010",
+          "8001"
+        ],
+        [
+          "2175",
+          "7001"
+        ],
+        [
+          "2175",
+          "8001"
+        ],
+        [
+          "2190",
+          "7001"
+        ],
+        [
+          "2190",
+          "8001"
+        ],
+        [
+          "2580",
+          "7001"
+        ],
+        [
+          "2580",
+          "8001"
+        ]
+      ],
+      "min_temp": 42,
+      "max_temp": 47
     }
   ],
   "known_failure": "16-layer BF16 dynamic decode exceeds unchanged CPU FP64 tolerance; eager and Graph bitwise identical at failing position; no BF16 large-model performance claim"

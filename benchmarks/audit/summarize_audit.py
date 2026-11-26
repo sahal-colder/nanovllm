@@ -59,7 +59,7 @@ for name in ['small-f16','large-f16']:
 ctest=(out/'ctest.stdout').read_text();assert '100% tests passed, 0 tests failed out of 8' in ctest
 validation=[];large_race_log=out/'envelope-large-f16-racecheck.log'
 large_race_text=large_race_log.read_text() if large_race_log.exists() else ''
-large_race_pass='0 errors, 0 warnings' in large_race_text
+large_race_pass='RACECHECK SUMMARY: 0 hazards displayed (0 errors, 0 warnings)' in large_race_text
 # A recorded failure cannot be hidden by treating a completed summary as missing.
 assert 'RACECHECK SUMMARY:' not in large_race_text or large_race_pass,large_race_log
 remaining=[]
@@ -84,13 +84,42 @@ if remaining:
     assert validation_state['status']=='partial','Incomplete Racecheck cannot be complete'
     assert validation_state.get('remaining')==remaining
     assert validation_state.get('completed_cases')==len(validation) and validation_state.get('total_cases')==16
-else:assert validation_state['status']=='complete','All-case success requires a complete validation phase'
+else:
+    assert validation_state['status']=='complete','All-case success requires a complete validation phase'
+    assert validation_state.get('completed_cases')==16 and validation_state.get('total_cases')==16
+    assert validation_state.get('remaining')==[]
+resolution=None;resolution_dir=out/'racecheck-resolution'
+if large_race_pass and resolution_dir.exists():
+    resolution=json.loads((resolution_dir/'summary.json').read_text())
+    assert resolution['status']=='complete' and resolution['sanitizer_matrix_completed']==16
+    assert json.loads((resolution_dir/'resolution-status.json').read_text())['status']=='complete'
+    identity=json.loads((resolution_dir/'identity.json').read_text())
+    commands=json.loads((resolution_dir/'commands.json').read_text())
+    assert [c['name'] for c in commands]==['ordinary','memcheck','racecheck']
+    assert all('--validate-decode' in c['argv'] and not any(x.startswith(('--kernel-name','--launch-skip','--launch-count')) for x in c['argv']) for c in commands)
+    assert '--racecheck-num-workers' in commands[-1]['argv']
+    for name in ['ordinary','memcheck','racecheck']:
+        txt=(resolution_dir/(name+'-validation.log')).read_text()
+        assert 'FAIL ' not in txt and 'PASS audit decoder dtype=f16 layers=16 dynamic_steps=5' in txt
+        assert txt.count('PASS dynamic graph_eager_bitwise_equal=1')==5
+        assert txt.count('PASS validation scope=')==3 and 'KV_slots=16777216' in txt
+        assert 'PASS validation_only=1 timing_samples=0 warmup_steps=0 flush_calls=0 kernel_filter=none' in txt
+        assert not (resolution_dir/(name+'.stdout')).read_text()
+    assert 'ERROR SUMMARY: 0 errors' in (resolution_dir/'memcheck.log').read_text()
+    assert (resolution_dir/'racecheck.log').read_text()==large_race_text
+    assert (resolution_dir/'racecheck-validation.log').read_text()==(out/'envelope-large-f16-racecheck-validation.log').read_text()
+    resource_rows=[json.loads(x) for x in (resolution_dir/'telemetry.jsonl').read_text().splitlines()]
+    capped=[cg for r in resource_rows for cg in r.get('process_cgroup',{}).values() if cg.get('memory.max')==str(6*2**30)]
+    assert capped and all(cg['memory.swap.max']=='0' and cg['memory.swap.current']=='0' for cg in capped)
+    assert all('oom_kill 0' in cg['memory.events'] for cg in capped)
+    resolution['observed_cgroup_memory_peak_MiB']=max(int(cg['memory.peak'])/2**20 for cg in capped)
+    resolution['observed_cgroup_swap_bytes']=0
 nsys=json.loads((out/'nsys/timeline-summary.json').read_text());assert nsys['host_launches_per_step']=={'eager':51,'graph':1}
 assert 'f16' in (out/'nsys/profile.stdout').read_text()
 bf16_log=out/'rejected-decode-bf16/diagnostic.log'
 bf16_failed=bf16_log.is_file() and 'FAIL dynamic transfer Graph CPU FP64' in bf16_log.read_text()
 telemetry=[]
-for name in ['telemetry.jsonl','ncu/telemetry.jsonl','decode-telemetry.jsonl','validation-telemetry.jsonl','nsys/telemetry.jsonl']:
+for name in ['telemetry.jsonl','ncu/telemetry.jsonl','decode-telemetry.jsonl','validation-telemetry.jsonl','nsys/telemetry.jsonl']+(['racecheck-resolution/telemetry.jsonl'] if resolution else []):
     data=[json.loads(x) for x in (out/name).read_text().splitlines()];assert data
     for r in data:
         assert not r['compute'] or r['allowed_root_pid'],r
@@ -98,7 +127,9 @@ for name in ['telemetry.jsonl','ncu/telemetry.jsonl','decode-telemetry.jsonl','v
     temperature=[int(r['gpu'].split(', ')[5]) for r in data]
     telemetry.append(dict(file=name,snapshots=len(data),sm_mem_MHz=sorted({tuple(r['gpu'].split(', ')[3:5]) for r in data}),min_temp=min(temperature),max_temp=max(temperature)))
 env=json.loads((out/'environment.json').read_text())
-summary=dict(validation_status=validation_state['status'],validation_completed_cases=len(validation),validation_total_cases=16,validation_remaining=remaining,phase_states=states,large_full_racecheck_passed=large_race_pass,environment=env,attention=attention,operators=operators,ncu=ncu,decoder=decoder,validation=validation,nsys=nsys,telemetry=telemetry,known_failure='16-layer BF16 dynamic decode exceeds unchanged CPU FP64 tolerance; eager and Graph bitwise identical at failing position; no BF16 large-model performance claim' if bf16_failed else '16-layer BF16 not part of this accepted performance matrix')
+if resolution:
+    assert all(env['source_sha256'][k]==v for k,v in identity['unchanged_production_source_sha256'].items())
+summary=dict(validation_status=validation_state['status'],validation_completed_cases=len(validation),validation_total_cases=16,validation_remaining=remaining,phase_states=states,large_full_racecheck_passed=large_race_pass,racecheck_resolution=resolution,environment=env,attention=attention,operators=operators,ncu=ncu,decoder=decoder,validation=validation,nsys=nsys,telemetry=telemetry,known_failure='16-layer BF16 dynamic decode exceeds unchanged CPU FP64 tolerance; eager and Graph bitwise identical at failing position; no BF16 large-model performance claim' if bf16_failed else '16-layer BF16 not part of this accepted performance matrix')
 (out/'summary.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n')
 for name,rows in [('attention',attention),('operators',operators),('ncu',ncu),('decoder',decoder)]:
     with (out/f'summary-{name}.csv').open('w',newline='') as f:
@@ -111,7 +142,7 @@ def pct(e,g,key):return 100*(1-number(g[key])/number(e[key]))
 def f(x,d=2):return f'{number(x):.{d}f}'
 text=['# CUDA 评测审计与实测报告（2026-11-26，Australia/Perth）','',
 '本轮在用户释放GPU后完成正式重测。采用RTX 4060 Laptop GPU，所有GPU工作串行执行；每个阶段的进程守卫均未发现外部CUDA计算任务。此前并发VLLM干扰及失败阶段保留，但不进入正式性能结论。',
-'',f'正式证据目录：`{rel}/`。性能、NCU、Decode均完成；现有{len(validation)}份sanitizer通过日志。'+('16层整步Racecheck也通过。' if large_race_pass else '**额外16层整步Racecheck未完成，日志无完成摘要，不能算通过；不再自动重跑高开销任务。**')+'新结果与历史热缓存日志分开，以下除明确说明外均来自本轮真实实测。',
+'',f'正式证据目录：`{rel}/`。性能、NCU、Decode均完成；现有{len(validation)}/16项sanitizer矩阵通过。'+('16层FP16完整链路的独立正确性入口已通过Racecheck；旧计时循环插桩中断记录仍保留。' if large_race_pass else '**额外16层整步Racecheck未完成，日志无完成摘要，不能算通过；不再自动重跑高开销任务。**')+'新结果与历史热缓存日志分开，以下除明确说明外均来自本轮真实实测。',
 '','## 1. 评测审计与实测报告','','### 硬件、计时与正确性口径','',
 'RTX 4060 Laptop GPU，24 SM、CC8.9、128-bit显存总线；nvidia-smi显存8188 MiB，L2为**33,554,432 bytes = 32 MiB**。Driver615.71.09，NVCC13.4.92，cuBLAS130800，NCU2026.3.1，NSys2026.3.2。',
 '',
@@ -119,7 +150,7 @@ text=['# CUDA 评测审计与实测报告（2026-11-26，Australia/Perth）','',
 '',
 '冷缓存：每次调用前在同一stream完整读改写128 MiB驱逐区（4×L2）；flush位于start event之前，不计入算子延迟。允许同一次调用内缓存复用。Attention partition与merge之间不驱逐。热缓存只用于同地址warmup重复调用的对照。每方法100个event样本，报告P50/P95；有效GiB/s按逻辑唯一张量字节计算，区别于NCU真实DRAM字节。',
 '',
-'全量CTest **8/8**通过。算子、新增三路Attention、FP16/BF16超L2冷调用、三dtype小模型传输/greedy Graph的Memcheck/Racecheck均零错误、Racecheck零警告；16层FP16完整步的普通数值与Memcheck通过，额外整步Racecheck未完成。完整16层FP16逐16,777,216个物理KV槽对照CPU参考，并检查5个动态步的Graph/eager logits逐位一致。',
+'全量CTest **8/8**通过。算子、新增三路Attention、FP16/BF16超L2冷调用、三dtype小模型传输/greedy Graph的Memcheck/Racecheck均零错误、Racecheck零警告；'+('16层FP16独立正确性入口也通过普通数值、Memcheck与Racecheck，未过滤任何Kernel。' if large_race_pass else '16层FP16完整步的普通数值与Memcheck通过，额外整步Racecheck未完成。')+'完整16层FP16逐16,777,216个物理KV槽对照CPU参考，并检查5个动态步的Graph/eager logits逐位一致。',
 '',
 'CPU参考使用独立FP64算术并显式模拟存储舍入；验收是**容差内零校验失败，不是浮点零误差**。Attention atol/rtol：FP32=2e-5/3e-4，FP16=1e-3/2e-3，BF16=8e-3/1.6e-2；GEMV/RMS为1e-4/2e-4、1e-3/2e-3、8e-3/1.6e-2；完整前向为1e-4/3e-4、3e-3/8e-3、2e-2/5e-2。逐元素满足`abs_err <= atol + rtol*abs(ref)`，近零max_rel需与max_abs一起解释。',
 '','### Attention：冷/热差异及Baseline','',
@@ -220,15 +251,16 @@ f'插桩GPU活动窗口间隙比例{f(nsys["eager"]["gpu_gap_percent"])}%→{f(n
 '','### 桌面卡顿与资源约束','',
 '两次16层整步Racecheck没有写出完成摘要，后续检测到系统重新启动。最后可用遥测显示GPU占用100%、约749MiB/8188MiB显存，不能解释为显存耗尽。16:49之后检查可用主存约10GiB、Swap为0；但这些是重启后的快照，不能反证卡顿时主存未曾紧张。之前没有主存峰值记录；现有内核日志未查到OOM或NVIDIA Xid，卡顿根因尚未证实。',
 '',
-'完整性能循环包含大量预热、flush、eager/Graph重复，放进Racecheck给桌面GPU带来不必要的持续满载；这是验证流程安排不当。已取消默认的大模型整步Racecheck，不再自动重试，改为保留15项已完成验证与16层普通数值/Memcheck，额外Racecheck明确未完成。',
+'完整性能循环包含大量预热、flush、eager/Graph重复，放进Racecheck给桌面GPU带来不必要的持续满载；这是验证流程安排不当。'+('新增`--validate-decode MODEL DT`独立正确性入口：不执行预热、计时或flush，保留原模型、计算/CPU greedy/GPU greedy三种范围、两条传输Graph、5个动态位置及全部物理KV校验。原5样本入口执行164次完整前向，新入口执行16次；没有过滤Kernel、缩小模型、放宽容差或发布插桩耗时为性能。旧性能循环的Racecheck仍未完成，当前关闭的是相同完整计算链路的正确性验收。' if large_race_pass else '额外Racecheck仍未完成，不重试旧性能循环。'),
 '',
-'guard新增MemAvailable/Swap/内存PSI、目标进程RSS/Swap采样；默认至少预留3GiB主存、1GiB显存，Swap使用超过512MiB或单子进程超过180秒即终止自身进程组；sanitizer以nice+10运行。资源保护不改变正常性能计时，不能保证抢占单个长GPU Kernel，故不能代替避免高开销重复。仅完成CPU侧语法/逻辑检查，本轮未再次施加GPU压力。',
+'guard记录MemAvailable/Swap/内存PSI、目标进程RSS/Swap与cgroup实际限制；默认至少预留3GiB主存、1GiB显存，单子进程超过180秒即终止自身进程组，sanitizer以nice+10运行。'+('本次首次正确性重试因主机总Swap超过原512MiB阈值被守卫主动终止（仍有约10GiB可用内存，目标VmSwap=0），完整记录保留在`racecheck-resolution-guard-aborted/`。随后把验证放入独立systemd用户scope，实际施加MemoryMax=6GiB、MemorySwapMax=0；主机总Swap上限改为1GiB，Racecheck只用1个分析线程。成功日志、命令、资源时序和新验证二进制身份保存在`racecheck-resolution/`；既有测量binary/environment与全部性能CSV保持不变。' if resolution else '资源保护不能保证抢占单个长GPU Kernel，故不能代替避免高开销重复。'),
+*(['',f'正确性验证实测：Racecheck总wall {f(resolution["validation_wall_seconds"]["racecheck"])}秒（不属于性能指标），成功阶段观测到的cgroup内存峰值{f(resolution["observed_cgroup_memory_peak_MiB"])} MiB、job Swap=0、最小主机MemAvailable {f(resolution["min_MemAvailable_MiB"])} MiB；cgroup未发生OOM kill。Memcheck另行完成且零错误。所有实测限制均从本次telemetry核对，不能追溯声称旧中断阶段也受这些限制。', '', '本次闭环精确命令（其余15项不重跑）：', '', '```sh', 'cmake -S . -B build-cuda-validation -DNANO_WITH_CUDA=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_ARCHITECTURES=89', 'cmake --build build-cuda-validation --target bench_decode -j2', f'python3 benchmarks/audit/finish_validation.py build-cuda-validation {rel} --model build-cuda/fixtures/audit16.bin', '```', '', '`finish_validation.py`仅接受partial状态并拒绝覆盖既有resolution目录；当前正式目录已complete，重复验证应选择新目录。单独复测Racecheck可使用下列命令；日志文件名应为新路径：', '', '```sh', 'NV_BENCH_MAX_SWAP_MIB=1024 python3 benchmarks/audit/guard_command.py benchmarks/audit/check-telemetry.jsonl -- systemd-run --user --scope --quiet -p MemoryMax=6G -p MemorySwapMax=0 nice -n 10 compute-sanitizer --tool racecheck --racecheck-num-workers 1 --error-exitcode 99 --log-file benchmarks/audit/check-racecheck.log build-cuda-validation/bench_decode --validate-decode build-cuda/fixtures/audit16.bin f16', '```'] if resolution else []),
 '','## 2. 简历改写版（中文，4条）','']
 f16=att('f16','cold','split_online_vec4');naive=att('f16','cold','serial_online');vec=att('f16','cold','unsplit_vec4');r=nmetric('attention-f16-cold-m1');rmsb=op('f32','rmsnorm','cold','baseline');rmso=op('f32','rmsnorm','cold','optimized');gemv=op('f32','sgemv','cold','optimized');lib=op('f32','sgemv','cold','cublasSgemv');gm=nmetric('gemv-f32-m1')
 resume=[f'针对长序列Decode的串行与并行度瓶颈，实现64-token分段Online Softmax及max/sumexp归约合并；RTX4060 Laptop上FP16 B2/H16/KV4/D128、S32768（KV约128MiB），冷L2 P50 {f(naive["p50_us"])}→{f(f16["p50_us"])} µs，较自有未分段基线{f(number(naive["p50_us"])/number(f16["p50_us"]))}×，向量未分段消融{f(number(vec["p50_us"])/number(f16["p50_us"]))}×；分段Kernel NCU DRAM {f(r["dram_pct"])}%、Occupancy {f(r["occupancy_pct"])}%。',
 f'针对RMSNorm重复访存，实现向量读写与输入寄存器驻留；FP32 128×4096、每调用前驱逐128MiB，对比同256-thread行归约标量基线，P50 {f(rmsb["p50_us"])}→{f(rmso["p50_us"])} µs（{f(number(rmsb["p50_us"])/number(rmso["p50_us"]))}×）；GEMV FP32 8192×4096/B1冷NCU达{f(gm["dram_GiB_s"])} GiB/s、DRAM {f(gm["dram_pct"])}%，另测冷缓存P50 {f(gemv["p50_us"])} µs，cuBLAS {f(lib["p50_us"])} µs，明确性能边界。',
 f'针对B1 Decode的Host提交开销，利用固定地址与动态长度/页表复用CUDA Graph，并在benchmark内捕获元数据H2D、GPU greedy与Token ID回传；16层d1024随机模型FP16、冷L2完整步P50 {f(e["p50_wall_us"])}→{f(g["p50_wall_us"])} µs（降低{f(pct(e,g,"p50_wall_us"))}%），小模型FP16 NSys证实每步51次Kernel提交→1次Graph提交。',
-'针对分页与低精度正确性，覆盖FP32/FP16/BF16、GQA/MQA、乱序页、尾部及动态Graph更新；独立CPU FP64逐输出/逐物理KV槽验收容差内零失败，算子及小模型Memcheck/Racecheck零错误，16层FP16校验1677万KV槽并通过Memcheck。'+('另披露16层BF16深层数值容差限制。' if bf16_failed else '')]
+'针对分页与低精度正确性，覆盖FP32/FP16/BF16、GQA/MQA、乱序页、尾部及动态Graph更新；独立CPU FP64逐输出/逐物理KV槽验收容差内零失败，算子及小模型Memcheck/Racecheck零错误，16层FP16校验1677万KV槽并通过'+('独立正确性入口的Memcheck/Racecheck，16/16项验收完成。' if large_race_pass else 'Memcheck。')+('另披露16层BF16深层数值容差限制。' if bf16_failed else '')]
 text += ['- '+x for x in resume]+['','## 3. README补强清单','',
 '- [x] 以当前cold/hot表替换混合口径绝对延迟，写明128MiB驱逐位于计时外；硬件精确L2字节、dtype与实际长度。',
 '- [x] Attention三路Baseline、FP16/BF16超L2、P50/P95、有效GiB/s与partition/merge真实DRAM/Occupancy分列。',
@@ -237,7 +269,7 @@ text += ['- '+x for x in resume]+['','## 3. README补强清单','',
 '- [x] 同精度FP16 NSys原始报告、SQLite、官方统计及51→1真实时间线；说明GPU Kernel数量不变。',
 '- [x] 固定seed、完整命令、source/binary/model哈希、进程守卫、sanitizer与CPU FP64误差日志。',
 '- [x] 保留受干扰/失败/顺序计时记录并排除，明确16层BF16失败，不更改容差或隐去反例。',
-'- [ ] 额外16层整步Racecheck未完成；涉及桌面卡顿，不作为通过证据，也不自动重试。',
+('- [x] 16层FP16独立正确性入口完整Racecheck零错误/零警告；16/16项矩阵闭环，保留旧性能循环中断与资源守卫终止记录。' if large_race_pass else '- [ ] 额外16层整步Racecheck未完成；不作为通过证据。'),
 '']
 report='\n'.join(text);(out/'REPORT.md').write_text(report)
 if a.publish:
@@ -261,12 +293,13 @@ if a.publish:
         ['16层d1024随机模型FP16完整GPU greedy步',f(e['p50_wall_us']),f(g['p50_wall_us']),f(pct(e,g,'p50_wall_us'))+'%降低；含metadata H2D/Token回传']])
     section+=['完整步固定B1/seq129，不含CPU页管理/调度或文本输出，非训练模型生成TPS。Graph对照双方预热20次，100组成对交错、交替先后采样。', '',
     f'独立NCU：FP16 Attention partition DRAM {f(r["dram_pct"])}%、{f(r["dram_GiB_s"])} GiB/s、Occupancy {f(r["occupancy_pct"])}%；FP32 GEMV DRAM {f(gm["dram_pct"])}%、{f(gm["dram_GiB_s"])} GiB/s。有效带宽与真实DRAM带宽分开，partition不能代表整条Attention。', '',
-    f'8/8 CTest，{len(validation)}份完成的Memcheck/Racecheck日志零错误；16层FP16普通数值与Memcheck通过，额外整步Racecheck未完成。CPU FP64逐输出/逐物理KV槽在已验收范围容差内零失败。'+('**16层BF16动态前向超出既定容差，已保留失败并排除性能结论；没有放宽容差。** ' if bf16_failed else '16层BF16未纳入当前正式性能矩阵。')+'数值零失败与浮点零误差分开表述。', '',
+    f'8/8 CTest，{len(validation)}/16项Memcheck/Racecheck矩阵零错误；'+('16层FP16使用完整模型的独立正确性入口完成Racecheck，保留5步动态Graph和1677万KV槽校验。' if large_race_pass else '16层FP16普通数值与Memcheck通过，额外整步Racecheck未完成。')+'CPU FP64逐输出/逐物理KV槽在已验收范围容差内零失败。'+('**16层BF16动态前向超出既定容差，已保留失败并排除性能结论；没有放宽容差。** ' if bf16_failed else '16层BF16未纳入当前正式性能矩阵。')+'数值零失败与浮点零误差分开表述。', '',
     'FP16 NSys真实SQLite：每模式5步，255次Kernel提交→5次Graph提交，即每步51→1，GPU仍执行相同51个Kernel。trace是重复计算步，只用于Launch归因。', '',
     f'![FP16 NSys实际时间线]({rel}/nsys/decode-timeline.png)', '',
     '精确构建/重测/NCU/NSys/sanitizer命令、缓存说明及原始证据见[评测入口](benchmarks/audit/README.md)，[4条简历改写](docs/RESUME_CUDA_AUDITED.md)。', '']
     readme=readme[:start]+'\n'.join(section)+'\n'+readme[end:]
     readme=readme.replace('新增评测代码已编译，独占 GPU 的性能与 sanitizer 验收待跑；受并发 VLLM 干扰的结果已拒收。','已完成独占GPU冷缓存重测与15项sanitizer验证；额外16层整步Racecheck未完成，受干扰/失败记录保留并排除。')
+    if large_race_pass:readme=readme.replace('已完成独占GPU冷缓存重测与15项sanitizer验证；额外16层整步Racecheck未完成，受干扰/失败记录保留并排除。','已完成独占GPU冷缓存重测与16/16项sanitizer矩阵；16层FP16完整链路采用独立正确性入口完成Racecheck，旧中断/失败记录保留并排除。')
     main.write_text(readme)
     historical=root/'docs/CUDA_VALIDATION.md';body=historical.read_text()
     body=body.replace('73.73µs为热缓存；新增代码尚未重新完成GPU验收。','73.73µs为历史热缓存；新增正式性能已重测，15项sanitizer通过，额外16层Racecheck未完成；BF16限制见最新报告。')

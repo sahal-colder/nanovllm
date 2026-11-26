@@ -2,7 +2,7 @@
 
 本轮在用户释放GPU后完成正式重测。采用RTX 4060 Laptop GPU，所有GPU工作串行执行；每个阶段的进程守卫均未发现外部CUDA计算任务。此前并发VLLM干扰及失败阶段保留，但不进入正式性能结论。
 
-正式证据目录：`benchmarks/audit/results-20261126-final/`。性能、NCU、Decode均完成；现有15份sanitizer通过日志。**额外16层整步Racecheck未完成，日志无完成摘要，不能算通过；不再自动重跑高开销任务。**新结果与历史热缓存日志分开，以下除明确说明外均来自本轮真实实测。
+正式证据目录：`benchmarks/audit/results-20261126-final/`。性能、NCU、Decode均完成；现有16/16项sanitizer矩阵通过。16层FP16完整链路的独立正确性入口已通过Racecheck；旧计时循环插桩中断记录仍保留。新结果与历史热缓存日志分开，以下除明确说明外均来自本轮真实实测。
 
 ## 1. 评测审计与实测报告
 
@@ -14,7 +14,7 @@ RTX 4060 Laptop GPU，24 SM、CC8.9、128-bit显存总线；nvidia-smi显存8188
 
 冷缓存：每次调用前在同一stream完整读改写128 MiB驱逐区（4×L2）；flush位于start event之前，不计入算子延迟。允许同一次调用内缓存复用。Attention partition与merge之间不驱逐。热缓存只用于同地址warmup重复调用的对照。每方法100个event样本，报告P50/P95；有效GiB/s按逻辑唯一张量字节计算，区别于NCU真实DRAM字节。
 
-全量CTest **8/8**通过。算子、新增三路Attention、FP16/BF16超L2冷调用、三dtype小模型传输/greedy Graph的Memcheck/Racecheck均零错误、Racecheck零警告；16层FP16完整步的普通数值与Memcheck通过，额外整步Racecheck未完成。完整16层FP16逐16,777,216个物理KV槽对照CPU参考，并检查5个动态步的Graph/eager logits逐位一致。
+全量CTest **8/8**通过。算子、新增三路Attention、FP16/BF16超L2冷调用、三dtype小模型传输/greedy Graph的Memcheck/Racecheck均零错误、Racecheck零警告；16层FP16独立正确性入口也通过普通数值、Memcheck与Racecheck，未过滤任何Kernel。完整16层FP16逐16,777,216个物理KV槽对照CPU参考，并检查5个动态步的Graph/eager logits逐位一致。
 
 CPU参考使用独立FP64算术并显式模拟存储舍入；验收是**容差内零校验失败，不是浮点零误差**。Attention atol/rtol：FP32=2e-5/3e-4，FP16=1e-3/2e-3，BF16=8e-3/1.6e-2；GEMV/RMS为1e-4/2e-4、1e-3/2e-3、8e-3/1.6e-2；完整前向为1e-4/3e-4、3e-3/8e-3、2e-2/5e-2。逐元素满足`abs_err <= atol + rtol*abs(ref)`，近零max_rel需与max_abs一起解释。
 
@@ -147,16 +147,32 @@ python3 benchmarks/audit/summarize_audit.py benchmarks/audit/new-run
 
 两次16层整步Racecheck没有写出完成摘要，后续检测到系统重新启动。最后可用遥测显示GPU占用100%、约749MiB/8188MiB显存，不能解释为显存耗尽。16:49之后检查可用主存约10GiB、Swap为0；但这些是重启后的快照，不能反证卡顿时主存未曾紧张。之前没有主存峰值记录；现有内核日志未查到OOM或NVIDIA Xid，卡顿根因尚未证实。
 
-完整性能循环包含大量预热、flush、eager/Graph重复，放进Racecheck给桌面GPU带来不必要的持续满载；这是验证流程安排不当。已取消默认的大模型整步Racecheck，不再自动重试，改为保留15项已完成验证与16层普通数值/Memcheck，额外Racecheck明确未完成。
+完整性能循环包含大量预热、flush、eager/Graph重复，放进Racecheck给桌面GPU带来不必要的持续满载；这是验证流程安排不当。新增`--validate-decode MODEL DT`独立正确性入口：不执行预热、计时或flush，保留原模型、计算/CPU greedy/GPU greedy三种范围、两条传输Graph、5个动态位置及全部物理KV校验。原5样本入口执行164次完整前向，新入口执行16次；没有过滤Kernel、缩小模型、放宽容差或发布插桩耗时为性能。旧性能循环的Racecheck仍未完成，当前关闭的是相同完整计算链路的正确性验收。
 
-guard新增MemAvailable/Swap/内存PSI、目标进程RSS/Swap采样；默认至少预留3GiB主存、1GiB显存，Swap使用超过512MiB或单子进程超过180秒即终止自身进程组；sanitizer以nice+10运行。资源保护不改变正常性能计时，不能保证抢占单个长GPU Kernel，故不能代替避免高开销重复。仅完成CPU侧语法/逻辑检查，本轮未再次施加GPU压力。
+guard记录MemAvailable/Swap/内存PSI、目标进程RSS/Swap与cgroup实际限制；默认至少预留3GiB主存、1GiB显存，单子进程超过180秒即终止自身进程组，sanitizer以nice+10运行。本次首次正确性重试因主机总Swap超过原512MiB阈值被守卫主动终止（仍有约10GiB可用内存，目标VmSwap=0），完整记录保留在`racecheck-resolution-guard-aborted/`。随后把验证放入独立systemd用户scope，实际施加MemoryMax=6GiB、MemorySwapMax=0；主机总Swap上限改为1GiB，Racecheck只用1个分析线程。成功日志、命令、资源时序和新验证二进制身份保存在`racecheck-resolution/`；既有测量binary/environment与全部性能CSV保持不变。
+
+正确性验证实测：Racecheck总wall 46.28秒（不属于性能指标），成功阶段观测到的cgroup内存峰值1562.16 MiB、job Swap=0、最小主机MemAvailable 9719.50 MiB；cgroup未发生OOM kill。Memcheck另行完成且零错误。所有实测限制均从本次telemetry核对，不能追溯声称旧中断阶段也受这些限制。
+
+本次闭环精确命令（其余15项不重跑）：
+
+```sh
+cmake -S . -B build-cuda-validation -DNANO_WITH_CUDA=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_ARCHITECTURES=89
+cmake --build build-cuda-validation --target bench_decode -j2
+python3 benchmarks/audit/finish_validation.py build-cuda-validation benchmarks/audit/results-20261126-final --model build-cuda/fixtures/audit16.bin
+```
+
+`finish_validation.py`仅接受partial状态并拒绝覆盖既有resolution目录；当前正式目录已complete，重复验证应选择新目录。单独复测Racecheck可使用下列命令；日志文件名应为新路径：
+
+```sh
+NV_BENCH_MAX_SWAP_MIB=1024 python3 benchmarks/audit/guard_command.py benchmarks/audit/check-telemetry.jsonl -- systemd-run --user --scope --quiet -p MemoryMax=6G -p MemorySwapMax=0 nice -n 10 compute-sanitizer --tool racecheck --racecheck-num-workers 1 --error-exitcode 99 --log-file benchmarks/audit/check-racecheck.log build-cuda-validation/bench_decode --validate-decode build-cuda/fixtures/audit16.bin f16
+```
 
 ## 2. 简历改写版（中文，4条）
 
 - 针对长序列Decode的串行与并行度瓶颈，实现64-token分段Online Softmax及max/sumexp归约合并；RTX4060 Laptop上FP16 B2/H16/KV4/D128、S32768（KV约128MiB），冷L2 P50 23314.43→1168.38 µs，较自有未分段基线19.95×，向量未分段消融21.31×；分段Kernel NCU DRAM 63.69%、Occupancy 79.54%。
 - 针对RMSNorm重复访存，实现向量读写与输入寄存器驻留；FP32 128×4096、每调用前驱逐128MiB，对比同256-thread行归约标量基线，P50 25.60→18.43 µs（1.39×）；GEMV FP32 8192×4096/B1冷NCU达230.37 GiB/s、DRAM 96.72%，另测冷缓存P50 620.54 µs，cuBLAS 558.08 µs，明确性能边界。
 - 针对B1 Decode的Host提交开销，利用固定地址与动态长度/页表复用CUDA Graph，并在benchmark内捕获元数据H2D、GPU greedy与Token ID回传；16层d1024随机模型FP16、冷L2完整步P50 2735.13→2622.72 µs（降低4.11%），小模型FP16 NSys证实每步51次Kernel提交→1次Graph提交。
-- 针对分页与低精度正确性，覆盖FP32/FP16/BF16、GQA/MQA、乱序页、尾部及动态Graph更新；独立CPU FP64逐输出/逐物理KV槽验收容差内零失败，算子及小模型Memcheck/Racecheck零错误，16层FP16校验1677万KV槽并通过Memcheck。另披露16层BF16深层数值容差限制。
+- 针对分页与低精度正确性，覆盖FP32/FP16/BF16、GQA/MQA、乱序页、尾部及动态Graph更新；独立CPU FP64逐输出/逐物理KV槽验收容差内零失败，算子及小模型Memcheck/Racecheck零错误，16层FP16校验1677万KV槽并通过独立正确性入口的Memcheck/Racecheck，16/16项验收完成。另披露16层BF16深层数值容差限制。
 
 ## 3. README补强清单
 
@@ -167,4 +183,4 @@ guard新增MemAvailable/Swap/内存PSI、目标进程RSS/Swap采样；默认至�
 - [x] 同精度FP16 NSys原始报告、SQLite、官方统计及51→1真实时间线；说明GPU Kernel数量不变。
 - [x] 固定seed、完整命令、source/binary/model哈希、进程守卫、sanitizer与CPU FP64误差日志。
 - [x] 保留受干扰/失败/顺序计时记录并排除，明确16层BF16失败，不更改容差或隐去反例。
-- [ ] 额外16层整步Racecheck未完成；涉及桌面卡顿，不作为通过证据，也不自动重试。
+- [x] 16层FP16独立正确性入口完整Racecheck零错误/零警告；16/16项矩阵闭环，保留旧性能循环中断与资源守卫终止记录。

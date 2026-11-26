@@ -1,0 +1,81 @@
+[
+  {
+    "name": "ordinary",
+    "argv": [
+      "systemd-run",
+      "--user",
+      "--scope",
+      "--quiet",
+      "-p",
+      "MemoryMax=6G",
+      "-p",
+      "MemorySwapMax=0",
+      "nice",
+      "-n",
+      "10",
+      "/home/wty/nanovllm/build-cuda-validation/bench_decode",
+      "--validate-decode",
+      "/home/wty/nanovllm/build-cuda/fixtures/audit16.bin",
+      "f16"
+    ],
+    "shell": "systemd-run --user --scope --quiet -p MemoryMax=6G -p MemorySwapMax=0 nice -n 10 /home/wty/nanovllm/build-cuda-validation/bench_decode --validate-decode /home/wty/nanovllm/build-cuda/fixtures/audit16.bin f16"
+  },
+  {
+    "name": "memcheck",
+    "argv": [
+      "systemd-run",
+      "--user",
+      "--scope",
+      "--quiet",
+      "-p",
+      "MemoryMax=6G",
+      "-p",
+      "MemorySwapMax=0",
+      "nice",
+      "-n",
+      "10",
+      "compute-sanitizer",
+      "--tool",
+      "memcheck",
+      "--error-exitcode",
+      "99",
+      "--log-file",
+      "/home/wty/nanovllm/benchmarks/audit/results-20261126-final/racecheck-resolution/memcheck.log",
+      "/home/wty/nanovllm/build-cuda-validation/bench_decode",
+      "--validate-decode",
+      "/home/wty/nanovllm/build-cuda/fixtures/audit16.bin",
+      "f16"
+    ],
+    "shell": "systemd-run --user --scope --quiet -p MemoryMax=6G -p MemorySwapMax=0 nice -n 10 compute-sanitizer --tool memcheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/racecheck-resolution/memcheck.log /home/wty/nanovllm/build-cuda-validation/bench_decode --validate-decode /home/wty/nanovllm/build-cuda/fixtures/audit16.bin f16"
+  },
+  {
+    "name": "racecheck",
+    "argv": [
+      "systemd-run",
+      "--user",
+      "--scope",
+      "--quiet",
+      "-p",
+      "MemoryMax=6G",
+      "-p",
+      "MemorySwapMax=0",
+      "nice",
+      "-n",
+      "10",
+      "compute-sanitizer",
+      "--tool",
+      "racecheck",
+      "--error-exitcode",
+      "99",
+      "--log-file",
+      "/home/wty/nanovllm/benchmarks/audit/results-20261126-final/racecheck-resolution/racecheck.log",
+      "--racecheck-num-workers",
+      "1",
+      "/home/wty/nanovllm/build-cuda-validation/bench_decode",
+      "--validate-decode",
+      "/home/wty/nanovllm/build-cuda/fixtures/audit16.bin",
+      "f16"
+    ],
+    "shell": "systemd-run --user --scope --quiet -p MemoryMax=6G -p MemorySwapMax=0 nice -n 10 compute-sanitizer --tool racecheck --error-exitcode 99 --log-file /home/wty/nanovllm/benchmarks/audit/results-20261126-final/racecheck-resolution/racecheck.log --racecheck-num-workers 1 /home/wty/nanovllm/build-cuda-validation/bench_decode --validate-decode /home/wty/nanovllm/build-cuda/fixtures/audit16.bin f16"
+  }
+]

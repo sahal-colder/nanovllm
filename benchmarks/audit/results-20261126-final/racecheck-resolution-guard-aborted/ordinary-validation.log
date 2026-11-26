@@ -1,0 +1,10 @@
+PASS validation scope=compute mode=graph layers=16
+PASS validation scope=full_cpu_greedy modes=eager,graph layers=16
+PASS validation scope=full_gpu_greedy modes=eager,graph layers=16
+PASS dynamic graph_eager_bitwise_equal=1 pos=127 dtype=f16 logits=8192
+PASS dynamic graph_eager_bitwise_equal=1 pos=128 dtype=f16 logits=8192
+PASS dynamic graph_eager_bitwise_equal=1 pos=129 dtype=f16 logits=8192
+PASS dynamic graph_eager_bitwise_equal=1 pos=143 dtype=f16 logits=8192
+PASS dynamic graph_eager_bitwise_equal=1 pos=144 dtype=f16 logits=8192
+PASS validation_only=1 timing_samples=0 warmup_steps=0 flush_calls=0 kernel_filter=none dynamic_steps=5
+PASS audit decoder dtype=f16 layers=16 dynamic_steps=5 logits=65536 max_abs=0.0078125 max_rel=18.1045365 KV_slots=16777216 KV_abs=0.000244140625 greedy_matches_gpu_logits=1

@@ -6,6 +6,6 @@
 
 - 针对B1 Decode的Host提交开销，利用固定地址与动态长度/页表复用CUDA Graph，并在benchmark内捕获元数据H2D、GPU greedy与Token ID回传；16层d1024随机模型FP16、冷L2完整步P50 2735.13→2622.72 µs（降低4.11%），小模型FP16 NSys证实每步51次Kernel提交→1次Graph提交。
 
-- 针对分页与低精度正确性，覆盖FP32/FP16/BF16、GQA/MQA、乱序页、尾部及动态Graph更新；独立CPU FP64逐输出/逐物理KV槽验收容差内零失败，算子及小模型Memcheck/Racecheck零错误，16层FP16校验1677万KV槽并通过Memcheck。另披露16层BF16深层数值容差限制。
+- 针对分页与低精度正确性，覆盖FP32/FP16/BF16、GQA/MQA、乱序页、尾部及动态Graph更新；独立CPU FP64逐输出/逐物理KV槽验收容差内零失败，算子及小模型Memcheck/Racecheck零错误，16层FP16校验1677万KV槽并通过独立正确性入口的Memcheck/Racecheck，16/16项验收完成。另披露16层BF16深层数值容差限制。
 
 完整口径与复现：[评测审计](PERFORMANCE_AUDIT_20261126.md)。

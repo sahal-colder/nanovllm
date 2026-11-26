@@ -1,0 +1,10 @@
+{
+  "status": "partial",
+  "error": "16-layer full Racecheck interrupted without completion summary; repeated heavy instrumentation correlated with desktop freeze/reboots; do not automatically retry.",
+  "completed_cases": 15,
+  "total_cases": 16,
+  "remaining": [
+    "envelope-large-f16-racecheck"
+  ],
+  "updated_at": "2026-11-26T08:51:05.895631+00:00"
+}

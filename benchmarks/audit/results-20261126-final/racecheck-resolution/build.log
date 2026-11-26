@@ -1,0 +1,25 @@
+[  5%] Building C object CMakeFiles/nano_model.dir/src/model.c.o
+[ 10%] Building CUDA object CMakeFiles/nano_bench_cache.dir/benchmarks/audit/cache.cu.o
+[ 15%] Building C object CMakeFiles/nano_model.dir/src/cache.c.o
+[ 20%] Building C object CMakeFiles/nano_model.dir/src/tokenizer.c.o
+[ 25%] Building C object CMakeFiles/nano_model.dir/src/sampler.c.o
+[ 30%] Linking C static library libnano_model.a
+[ 30%] Built target nano_model
+[ 35%] Building CUDA object CMakeFiles/nano_operators.dir/src/operators/sgemv.cu.o
+[ 40%] Building CUDA object CMakeFiles/nano_bench_cache.dir/benchmarks/audit/greedy.cu.o
+[ 45%] Building CUDA object CMakeFiles/nano_operators.dir/src/operators/rmsnorm.cu.o
+[ 50%] Linking CUDA static library libnano_bench_cache.a
+[ 50%] Built target nano_bench_cache
+[ 55%] Building CUDA object CMakeFiles/nano_operators.dir/src/operators/attention.cu.o
+[ 60%] Building CUDA object CMakeFiles/nano_operators.dir/src/operators/decode_ops.cu.o
+[ 65%] Linking CUDA static library libnano_operators.a
+[ 65%] Built target nano_operators
+[ 75%] Building C object CMakeFiles/nano_cuda.dir/src/cuda_runtime.c.o
+[ 75%] Building C object CMakeFiles/nano_cuda.dir/src/engine.c.o
+[ 80%] Linking CUDA static library libnano_cuda.a
+[ 80%] Built target nano_cuda
+[ 85%] Building C object CMakeFiles/bench_decode.dir/benchmarks/round2/main.c.o
+[ 90%] Building C object CMakeFiles/bench_decode.dir/benchmarks/round2/attention_bench.c.o
+[ 95%] Building C object CMakeFiles/bench_decode.dir/benchmarks/round2/decode_bench.c.o
+[100%] Linking C executable bench_decode
+[100%] Built target bench_decode

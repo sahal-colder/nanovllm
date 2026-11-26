@@ -190,7 +190,9 @@ static void greedy_test(mi_dtype dt){
     CHECK(cudaStreamDestroy(stream));
 }
 void decode_audit(const char*path,mi_dtype dt,int samples){
-    REQUIRE(samples>=5&&samples<=1000);greedy_test(dt);
+    /* samples=0 is correctness-only: same full decoder and dynamic metadata,
+     * with no timing/warmup/eviction loop inside expensive instrumentation. */
+    REQUIRE(samples==0||(samples>=5&&samples<=1000));greedy_test(dt);
     NvModel m;nv_model_load(&m,path);REQUIRE(m.config.seq_len>=161);
     int blocks=(m.config.seq_len+15)/16;
     NvCuda g;nv_cuda_init(&g,&m,blocks,16,1,dt,1);NvCache cpu;nv_cache_init(&cpu,&m.config,(NvOptions){blocks,16,1,1,0});fill_prefix(&g,&cpu);
@@ -207,7 +209,19 @@ void decode_audit(const char*path,mi_dtype dt,int samples){
         CHECK(cudaStreamBeginCapture(g.stream,cudaStreamCaptureModeThreadLocal));envelope(&g,gpu,d_next,h_next);
         CHECK(cudaStreamEndCapture(g.stream,&full[gpu]));CHECK(cudaGraphInstantiate(&replay[gpu],full[gpu],0));
     }
-    void*flush;size_t flush_bytes;CHECK(nv_bench_cache_init(&flush,&flush_bytes));
+    void*flush=NULL;size_t flush_bytes=0;
+    if(!samples){
+        /* Initial execution covers compute Graph and both eager envelopes.
+         * Exercise each transfer Graph once; dynamic GPU-greedy Graph follows. */
+        fprintf(stderr,"PASS validation scope=compute mode=graph layers=%d\n",m.config.n_layers);
+        for(int gpu=0;gpu<2;gpu++){
+            CHECK(cudaGraphLaunch(replay[gpu],g.stream));REQUIRE(finish_envelope(&g,gpu,h_next)==expected_id);
+            CHECK(nv_cuda_download(&g));
+            for(int j=0;j<m.config.vocab_size;j++)compare(&error,g.h_logits[j],expected[j],atol,rtol,"validation transfer Graph CPU FP64");
+            fprintf(stderr,"PASS validation scope=%s modes=eager,graph layers=%d\n",gpu?"full_gpu_greedy":"full_cpu_greedy",m.config.n_layers);
+        }
+    }else{
+    CHECK(nv_bench_cache_init(&flush,&flush_bytes));
     puts("dtype,scope,mode,hidden,ffn,layers,heads,kv_heads,vocab,seq_len,batch,cache_policy,flush_bytes,samples,p50_wall_us,p95_wall_us,p50_device_us,p95_device_us,graph_nodes,max_abs_err,max_rel_err,greedy_id,sampling_order");
     /* Same input repeated to isolate submission overhead; not generation TPS.
      * Flush is synchronized before wall clock starts, so it cannot be counted. */
@@ -244,6 +258,7 @@ void decode_audit(const char*path,mi_dtype dt,int samples){
         CHECK(nv_cuda_download(&g));for(int j=0;j<m.config.vocab_size;j++)compare(&error,g.h_logits[j],expected[j],atol,rtol,"post-audit decoder");
         CHECK(cudaEventDestroy(start));CHECK(cudaEventDestroy(end));
     }
+    }
     /* Reuse the transfer+greedy Graph with NEW lengths and a NEW current-page
      * binding, crossing both page and split boundaries. Compare every logit. */
     int positions[]={127,128,129,143,144};
@@ -261,8 +276,9 @@ void decode_audit(const char*path,mi_dtype dt,int samples){
         REQUIRE(sampled==greedy_cpu(g.h_logits,m.config.vocab_size));
     }
     Error kv={0};check_kv(&g,&cpu,&kv);
+    if(!samples)fprintf(stderr,"PASS validation_only=1 timing_samples=0 warmup_steps=0 flush_calls=0 kernel_filter=none dynamic_steps=5\n");
     fprintf(stderr,"PASS audit decoder dtype=%s layers=%d dynamic_steps=5 logits=%zu max_abs=%.9g max_rel=%.9g KV_slots=%zu KV_abs=%.9g greedy_matches_gpu_logits=1\n",dtype_name(dt),m.config.n_layers,error.n,error.abs,error.rel,kv.n,kv.abs);
-    CHECK(cudaFree(flush));CHECK(cudaFree(d_next));CHECK(cudaFreeHost(h_next));
+    if(flush)CHECK(cudaFree(flush));CHECK(cudaFree(d_next));CHECK(cudaFreeHost(h_next));
     for(int i=0;i<2;i++){CHECK(cudaGraphExecDestroy(replay[i]));CHECK(cudaGraphDestroy(full[i]));}
     nv_cuda_free(&g);nv_cache_free(&cpu);nv_model_free(&m);free(table);free(expected);
 }

@@ -6,7 +6,7 @@ KV-Fabric 负责外部存储与数据传输；本仓库负责 GPU 常驻 KV 和�
 
 最新审计：[评测口径与待验收项](docs/PERFORMANCE_AUDIT_20261126.md)、
 [冷 L2 / Baseline / 完整步评测入口](benchmarks/audit/README.md)。
-已完成独占GPU冷缓存重测与15项sanitizer验证；额外16层整步Racecheck未完成，受干扰/失败记录保留并排除。
+已完成独占GPU冷缓存重测与16/16项sanitizer矩阵；16层FP16完整链路采用独立正确性入口完成Racecheck，旧中断/失败记录保留并排除。
 
 历史完整结果：[数值与性能验收](docs/CUDA_VALIDATION.md)、
 [阶段交付总结（含双项目简历）](docs/ROUND2_ACCEPTANCE.md)。
@@ -85,7 +85,7 @@ FP32原形状热缓存P50 73.73 µs，驱逐后120.83 µs；NCU热DRAM读取0、
 
 独立NCU：FP16 Attention partition DRAM 63.69%、132.75 GiB/s、Occupancy 79.54%；FP32 GEMV DRAM 96.72%、230.37 GiB/s。有效带宽与真实DRAM带宽分开，partition不能代表整条Attention。
 
-8/8 CTest，15份完成的Memcheck/Racecheck日志零错误；16层FP16普通数值与Memcheck通过，额外整步Racecheck未完成。CPU FP64逐输出/逐物理KV槽在已验收范围容差内零失败。**16层BF16动态前向超出既定容差，已保留失败并排除性能结论；没有放宽容差。** 数值零失败与浮点零误差分开表述。
+8/8 CTest，16/16项Memcheck/Racecheck矩阵零错误；16层FP16使用完整模型的独立正确性入口完成Racecheck，保留5步动态Graph和1677万KV槽校验。CPU FP64逐输出/逐物理KV槽在已验收范围容差内零失败。**16层BF16动态前向超出既定容差，已保留失败并排除性能结论；没有放宽容差。** 数值零失败与浮点零误差分开表述。
 
 FP16 NSys真实SQLite：每模式5步，255次Kernel提交→5次Graph提交，即每步51→1，GPU仍执行相同51个Kernel。trace是重复计算步，只用于Launch归因。
 

@@ -1,6 +1,6 @@
 # 冷 L2 与 Graph 评测审计
 
-状态：冷/热Attention、低精度超L2、NCU、交错FP16 Decode、8/8 CTest及15份Memcheck/Racecheck已验收。额外16层整步Racecheck未完成，不自动重试。
+状态：冷/热Attention、低精度超L2、NCU、交错FP16 Decode、8/8 CTest及16/16项Memcheck/Racecheck矩阵已验收。16层FP16完整计算链路使用独立正确性入口完成Racecheck，保留全部动态页表与KV槽校验；旧计时循环插桩中断记录仍保留。
 16层BF16动态前向超出既定CPU FP64容差，失败数据单独保留，不放宽容差、不参与正式性能矩阵。[审计报告](../../docs/PERFORMANCE_AUDIT_20261126.md)。
 
 只读复核历史：`python3 benchmarks/audit/audit_history.py`（不启动GPU工作）。
@@ -9,7 +9,7 @@
 compute 进程；遇到外部工作负载只停止本脚本的子进程，整批结果拒收。图形桌面保留。
 `telemetry.jsonl` 同时保存进程、显存、SM/显存频率与温度快照；未锁频时必须随数据公开。
 空目录名用于新测量；旧结果不会被覆盖。每个阶段写入 `*-status.json`，只有 `complete`
-代表整阶段成功；`failed/running` 的部分CSV不能冒充完整结果。当前validation为`partial`：逐项报告15份通过日志，额外16层整步Racecheck不算通过。
+代表整阶段成功；`failed/running` 的部分CSV不能冒充完整结果。当前validation为`complete`：原15项证据与新增完整模型正确性Racecheck共同闭环；补充Memcheck也通过。
 
 ```sh
 cmake -S . -B build-cuda -DNANO_WITH_CUDA=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_ARCHITECTURES=89
@@ -62,13 +62,31 @@ python3 benchmarks/audit/summarize_audit.py benchmarks/audit/new-run
 
 本机两次16层完整性能循环的Racecheck未写出完成摘要，期间发生桌面卡顿与系统重启。
 采集到的显存仅约749 MiB，不能归因于显存耗尽；此前未记录主存峰值，根因未证明。
-不再自动重试该高开销测试。默认验证15项：算子/超L2 Attention/小模型的Memcheck和
-Racecheck，以及16层FP16普通数值和Memcheck；16层整步Racecheck明确未完成。
+已将正确性和性能循环分开：`--validate-decode MODEL DT`跳过预热、计时与flush，完整
+前向从原5样本入口的164次减到16次；保留原模型/精度、计算Graph、CPU/GPU greedy
+传输Graph、位置127/128/129/143/144及16,777,216个物理KV槽。不使用kernel filter。
+该入口普通数值、Memcheck、Racecheck全部通过，Racecheck零错误/零警告。
 
-新guard在CPU侧记录MemAvailable、Swap、内存PSI、目标进程RSS/Swap；默认保留3 GiB
-主存、1 GiB显存，Swap使用超过512 MiB或单进程超过180秒时终止自身进程组。
-Sanitizer使用nice+10；这不保证长GPU Kernel可即时抢占，不能替代减少插桩工作量。
-这些保护只做了CPU侧检查，本轮未再次施加GPU压力验证。
+guard记录MemAvailable、Swap、内存PSI、进程RSS/Swap及cgroup实际限制；保留3 GiB
+主存、1 GiB显存，单进程最多180秒。验证使用systemd用户scope，MemoryMax=6 GiB、
+MemorySwapMax=0、nice+10；Racecheck使用1个分析线程。主机总Swap上限为1 GiB，
+区别于job自身禁止Swap。默认guard的512 MiB上限不变，只有验证入口使用该覆盖值。
+成功Racecheck约46.28秒，成功阶段观测到的cgroup内存峰值1562.16 MiB、job Swap为0；
+精确值与限制从`racecheck-resolution/telemetry.jsonl`核对，未发生OOM kill。
+先前因主机Swap超过512 MiB而主动中止的尝试也完整保留，不计为通过。
 
-`--full-large-racecheck`与`finish_validation.py --allow-heavy`为显式高开销入口，默认关闭，
-桌面GPU上不建议重跑。性能数据采集已完成，后续汇总只需运行`summarize_audit.py`。
+`validate_audit.py`默认完成16项矩阵，所有envelope sanitizer都使用正确性入口；
+`--skip-large-racecheck`必须如实产生partial。旧完整计时循环不再作为Racecheck入口。
+本次只补最后一项，没有重测合格性能，也没有放宽BF16容差。构建独立验证二进制，
+避免覆盖原测量二进制身份；闭环记录在`results-20261126-final/racecheck-resolution/`。
+
+```sh
+cmake -S . -B build-cuda-validation -DNANO_WITH_CUDA=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_CUDA_ARCHITECTURES=89
+cmake --build build-cuda-validation --target bench_decode -j2
+# 新日志路径；使用已生成的同一16层checkpoint
+NV_BENCH_MAX_SWAP_MIB=1024 python3 benchmarks/audit/guard_command.py benchmarks/audit/check-telemetry.jsonl -- systemd-run --user --scope --quiet -p MemoryMax=6G -p MemorySwapMax=0 nice -n 10 compute-sanitizer --tool racecheck --racecheck-num-workers 1 --error-exitcode 99 --log-file benchmarks/audit/check-racecheck.log build-cuda-validation/bench_decode --validate-decode build-cuda/fixtures/audit16.bin f16
+```
+
+Linux复测需启用用户systemd与cgroup v2 memory控制器。`finish_validation.py`只接受
+partial状态和新resolution目录；正式目录已complete，脚本会拒绝覆盖。日常复核只需
+运行`summarize_audit.py`，不自动重试任何中断或重采性能。

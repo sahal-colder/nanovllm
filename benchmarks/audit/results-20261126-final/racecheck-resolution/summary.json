@@ -1,0 +1,26 @@
+{
+  "status": "complete",
+  "sanitizer_matrix_completed": 16,
+  "sanitizer_matrix_total": 16,
+  "scope": "Correctness only; no warmup, timing or eviction; no kernel filter; full 16-layer FP16 decoder",
+  "dynamic_positions": [
+    127,
+    128,
+    129,
+    143,
+    144
+  ],
+  "physical_KV_slots": 16777216,
+  "validation_wall_seconds": {
+    "ordinary": 16.006374669999786,
+    "memcheck": 16.077663613999903,
+    "racecheck": 46.27563074600039
+  },
+  "telemetry_snapshots": 78,
+  "min_MemAvailable_MiB": 9719.5,
+  "max_swap_MiB": 633.0,
+  "max_process_RSS_MiB": 2473.8828125,
+  "automatic_retries": 0,
+  "performance_measurements_reused": true,
+  "BF16_tolerance_failure_unchanged": true
+}

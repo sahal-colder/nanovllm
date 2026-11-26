@@ -29,13 +29,16 @@ def run_checked(command,stdout,stderr,telemetry):
             with path.open('rb') as f:artifacts[str(path.resolve())]=hashlib.file_digest(f,'sha256').hexdigest()
     def check(ancestor=None):
         s=snapshot();s['allowed_root_pid']=ancestor;s['command']=list(map(str,command));s['artifacts_sha256']=artifacts
-        process_memory={}
+        process_memory={};process_cgroup={}
         for pid in {ancestor,*[int(r[0]) for r in s['compute']]}-{None}:
             try:
                 lines=Path(f'/proc/{pid}/status').read_text().splitlines()
                 process_memory[str(pid)]={line.split(':')[0]:line.split(':',1)[1].strip() for line in lines if line.startswith(('VmRSS:','VmSwap:','Threads:'))}
+                cgroup=next(line.split(':',2)[2] for line in Path(f'/proc/{pid}/cgroup').read_text().splitlines() if line.startswith('0::'))
+                directory=Path('/sys/fs/cgroup')/cgroup.lstrip('/')
+                process_cgroup[str(pid)]={'path':cgroup,**{name:(directory/name).read_text().strip() for name in ['memory.current','memory.peak','memory.max','memory.swap.current','memory.swap.max','memory.events'] if (directory/name).exists()}}
             except OSError:pass
-        s['process_memory']=process_memory;telemetry.write(json.dumps(s)+'\n');telemetry.flush()
+        s['process_memory']=process_memory;s['process_cgroup']=process_cgroup;telemetry.write(json.dumps(s)+'\n');telemetry.flush()
         foreign=[r for r in s['compute'] if not ancestor or not descendant(int(r[0]),ancestor)]
         if foreign:raise RuntimeError('Foreign CUDA compute process: '+repr(foreign))
         mem=s['host_memory'];reserve=int(os.environ.get('NV_BENCH_MIN_AVAILABLE_MIB','3072'))*1024

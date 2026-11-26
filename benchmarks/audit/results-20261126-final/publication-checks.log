@@ -1,10 +1,18 @@
-PASS reject false_complete
-PASS reject completed_with_errors
-PASS reject missing_numeric_pass
+PASS standalone full-16-layer FP16 ordinary validation
+PASS standalone Memcheck: 0 errors
+PASS standalone Racecheck: 0 errors, 0 warnings
+PASS 5 dynamic positions, 65536 logit comparisons, 16777216 physical KV slots
+PASS cgroup 6 GiB RAM / zero job Swap, one Racecheck worker; no kernel filter
+PASS reject missing_summary
+PASS reject error_summary
+PASS reject missing_numeric
+PASS reject missing_dynamic
+PASS reject filtered_kernels
+PASS reject changed_production
+PASS reject swap_enabled
+PASS original performance CSV / measurement environments / binaries unchanged
+PASS old interrupted and failed evidence retained by SHA256
 PASS local Markdown links
-PASS recorded measurement binaries match current build
-PASS 15/16 partial state retained
 PASS C11 format/syntax check
 PASS Python compile check
-PASS Bash syntax check
 PASS git diff --check

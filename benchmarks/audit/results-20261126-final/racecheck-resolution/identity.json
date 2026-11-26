@@ -1,0 +1,51 @@
+{
+  "collected_at": "2026-11-26T12:53:49.733773+00:00",
+  "binary": "/home/wty/nanovllm/build-cuda-validation/bench_decode",
+  "binary_sha256": "61fc91bd74de4f789efbaf13d152228b7359acc39816d5d402fa3c5fac11c458",
+  "model": "/home/wty/nanovllm/build-cuda/fixtures/audit16.bin",
+  "model_sha256": "bab083a83076c120b67119f12504e0be8c3bdd6cc8c7fea2a2ba03b2f5cdf443",
+  "source_sha256": {
+    "benchmarks/round2/main.c": "675f2baf8bf498a93f092c9d33fd249f3dc97285c6e4963207f0d4aeaaaae77c",
+    "benchmarks/round2/decode_bench.c": "32e7366622a5b798b8456d5fb02161c67ed7f82b7269a56ac933e44775b5f64d",
+    "benchmarks/round2/common.h": "23f1e13215bb69f0b89698c11c10c120c4a7a3848fffb3716289c9f18579f189",
+    "benchmarks/audit/finish_validation.py": "3f99b1790133353544a98b8500661a8b20b5d98fa66acfd7369f830878677a9d",
+    "benchmarks/audit/guard.py": "cb234e5cf6411e9b0b5d9a020799f34bb3cd9badfeeb75dc55694c0548d9a1d5"
+  },
+  "unchanged_production_source_sha256": {
+    "benchmarks/audit/greedy.cu": "99468927a1657ef12c18e67ca8c2095351e43e92d119a419fa5235230602433a",
+    "benchmarks/audit/greedy.h": "7885bb89acacdeee91becb43af8d49f8c90ebb7ed8a423d2de586da1ffad9487",
+    "include/miniinfer/operators.h": "6f6aea290f2a692bbc9c1e95bb21555baf324b58a75e7abe6b82a97e888566f5",
+    "include/nv.h": "daff21f7bcb45253adad5bd5bf88eba4cd7b74c498fc8033330ae4a53187e89a",
+    "include/nv_attention.h": "cd1100537463b0be0ba2599db5f73cfcdcff125f55bdd8e86b7c3e8e2e5d28d7",
+    "include/nv_cuda.h": "3daa1e78525e768307d1e68a70d65ca39c47fb3a0d5201db9956cc75f8379628",
+    "src/cache.c": "c672581b0776eccbee8b2f2697998a10b4ff8e2b5c3de3ae57dc04ae9ddfa8aa",
+    "src/cuda_runtime.c": "69010c0c71c0c2a9b931e1499fb3447fdbed211fe922742523ff4fc1f3554271",
+    "src/engine.c": "4782e4f8d75b9910581be8b319df2feeb2c290a03cf02ee71825112bfd80f521",
+    "src/main.c": "5b840caefa6a8878e6ca631cbc77c8bbcc350e2c97da18187e990fbc9d4538bb",
+    "src/model.c": "7db9bdca20a90be81ad78b1fc659cda1d18032d249be34f8b691311e3a9409d2",
+    "src/numeric.h": "02cb390a6034c9831f49be978dbf4134fe2ba54df899e2edc9f069e1db51777d",
+    "src/operators/attention.cu": "7401bba089377b9802c6a495b4b36f797662fd2804dd8bbed405f2c1ef7b40c6",
+    "src/operators/attention_shape.cuh": "1e939dcee8bafdeec94b37003c6deccd0bd5f75334e186d50d567a456f86c908",
+    "src/operators/decode_ops.cu": "281c016247860a007219593d04a6e1882843752416c41c341b89b32c3968460e",
+    "src/operators/rmsnorm.cu": "64b1603744d631be455e9c3fdcd087068127b85d6df2139053781dbbf91f9fe1",
+    "src/operators/sgemv.cu": "4f8071b1ac080e680086d897a66d616b60a1ca86679620f07999a41dd83ead8e",
+    "src/operators/vector.cuh": "161729cdfd21b5d74fd563afc6a10828afe557ccdada50fcd76490648d65c882",
+    "src/sampler.c": "fb85daa912395db43e3910dec572c3a722b3e136418b8d8b7b0715271980f6d9",
+    "src/tokenizer.c": "f6e8ab1a474bd58dc2565fa9b370486a2c6a46234cf98e4f6ee45cd7e780080e"
+  },
+  "prior_measurement_binary_sha256": {
+    "bench_decode": "96b474e9b5316337ebc8eb49d84690059553ab7e710af428f3b68cbafba8ba4d",
+    "bench_operators": "3eaae24dca12ac5db434ddf3b4caf5db683ffdc205cc50017380c841c3a3229e",
+    "nanovllm": "241f370aa7e80c8946219eeb4111bbeaea1bce7e441c8d021b691d0840b6397e",
+    "nanovllm_cuda": "c7f53a84b961d8700c761744066e6fa04f77b7f6e6b2508526be0d1cda28b827"
+  },
+  "scope": "Correctness only; no warmup, timing or eviction; no kernel filter; full 16-layer FP16 decoder",
+  "resource_limits": {
+    "cgroup_MemoryMax_bytes": 6442450944,
+    "cgroup_MemorySwapMax_bytes": 0,
+    "host_swap_ceiling_MiB": 1024,
+    "min_available_host_MiB": 3072,
+    "timeout_seconds": 180,
+    "racecheck_workers": 1
+  }
+}
